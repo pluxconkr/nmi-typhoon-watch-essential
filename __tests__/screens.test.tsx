@@ -44,7 +44,7 @@ const routes = {
   onboarding: OnboardingScreen,
 };
 
-const fetchSpy = jest.spyOn(global, 'fetch' as never);
+const fetchSpy = jest.spyOn(globalThis, 'fetch' as never);
 
 beforeEach(() => {
   hydrate();

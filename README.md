@@ -22,8 +22,8 @@ Not in v1 (on purpose): damage reports, volunteer matching, missing-person board
 
 ## Where the AI is (and is not)
 
-- **One place:** `src/app/api/summarize+api.ts` — a server-side route that rewrites an official alert into one sentence (≤ 15 words). The key never reaches the phone. Output is validated deterministically (word count, single sentence, every number must appear in the source text) and cached with the original text. If the route is missing or fails, the app shows the NWS headline instead.
-- **Which model:** a deployment setting, `SUMMARY_MODEL` (server-side env). Default `claude-opus-5`; `claude-sonnet-5` or `claude-haiku-4-5` work too and the route adapts its request options to the model. Cost is one call per alert id (~2k input + ~40 output tokens), so a full typhoon event is well under $1 on any of them.
+- **One place:** `src/app/api/summarize+api.ts` — a server-side route that rewrites an official alert into one sentence (15-word target, 20-word hard cap). The key never reaches the phone. Output is validated deterministically (word count, single sentence, every number must appear in the source text; one "shorten it" retry; model reasoning disabled so small models do not leak their chain of thought) and cached with the original text. If the route is missing or fails, the app shows the NWS headline instead.
+- **Which provider / model:** [OpenRouter](https://openrouter.ai) — one prepaid key, any vendor. The model is a deployment setting, `SUMMARY_MODEL` (server-side env, OpenRouter slug). Default `anthropic/claude-sonnet-5`; `openai/gpt-5.6-terra`, `google/gemini-3.8-flash` or any other slug work unchanged, and `SUMMARY_FALLBACK_MODELS` lists models to try if the primary is down. Cost is one call per alert id (~2k input + ~40 output tokens), so a full typhoon event costs cents.
 - **Nowhere else.** Quantities come from `src/domain/rules.ts` (multiplication table, versioned). The preparation window is four `if` branches. Phase (before / during / after) is derived from NWS alert timestamps and VTEC on the device clock. Severity is passed through from NWS unchanged. Shelter ranking is haversine distance plus filters. No translation, no model training.
 
 ## Stack
@@ -36,7 +36,7 @@ External APIs: 3 · API keys needed by the phone: 0 · Server functions: 1 (the 
 
 ```bash
 npm install
-cp .env.example .env        # optional: ANTHROPIC_API_KEY for the summary route
+cp .env.example .env        # optional: OPENROUTER_API_KEY (+ SUMMARY_MODEL) for the summary route
 npx expo start              # press i / a / w
 ```
 
@@ -53,6 +53,8 @@ npm test            # jest: rules table, windows, ChST time, NWS parsing, phase 
 ```
 
 Manual offline acceptance procedures (T1–T9 from the handoff spec) are in [docs/QA.md](docs/QA.md).
+
+To compare summary models before picking `SUMMARY_MODEL`: `OPENROUTER_API_KEY=… python3 scripts/bench-summary.py openai/gpt-5.6-luna meta-llama/llama-4-scout` (latency, word count, cost and validation on the four real Sinlaku alerts).
 
 ## Demo scenarios
 

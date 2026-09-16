@@ -5,7 +5,8 @@
  */
 import type { StoredAlert } from '@/domain/types';
 
-const TIMEOUT_MS = 25_000;
+/** Generous: free-tier models on OpenRouter can take 20–40 s, and the server may retry once. Background work only. */
+const TIMEOUT_MS = 120_000;
 
 /** Optional absolute origin for production builds; relative URL works in development. */
 const SUMMARY_URL = process.env.EXPO_PUBLIC_SUMMARY_URL ?? '/api/summarize';

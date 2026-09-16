@@ -1,5 +1,5 @@
 import saipan from '@/assets/data/saipan-coastline.json';
-import { validateSummary } from '@/app/api/summarize+api';
+import { firstSentence, validateSummary, validateWithFirstSentence } from '@/app/api/summarize+api';
 import { SAIPAN_BBOX, bearingDeg, compassLabel, formatDistance, haversineKm, makeProjection, ringToPath } from '@/domain/geo';
 import { derivePhase } from '@/domain/phase';
 import { buildDemoAlerts, DEMO_BEFORE_OFFSET_MS } from '@/services/demo';
@@ -79,9 +79,23 @@ describe('summary validation (server-side guard rails)', () => {
     expect(validateSummary('Winds over 74 mph arrive Tuesday morning.', source)).toEqual({ ok: true, summary: 'Winds over 74 mph arrive Tuesday morning.' });
   });
 
+  test('strips quotes, bullets and markdown a model might add', () => {
+    expect(validateSummary('"Winds over 74 mph arrive Tuesday morning."', source)).toEqual({ ok: true, summary: 'Winds over 74 mph arrive Tuesday morning.' });
+    expect(validateSummary('- “Winds over 74 mph arrive Tuesday morning.”', source)).toEqual({ ok: true, summary: 'Winds over 74 mph arrive Tuesday morning.' });
+  });
+
+  test('first-sentence rescue for chatty models', () => {
+    expect(firstSentence('Winds arrive Tuesday morning. Stay inside and prepare.')).toBe('Winds arrive Tuesday morning.');
+    expect(firstSentence('Winds arrive at 8 a.m. Tuesday.')).toBe('Winds arrive at 8 a.m. Tuesday.');
+    expect(validateWithFirstSentence('Winds over 74 mph arrive Tuesday morning. Here is why I chose this wording: the alert says so.', source)).toEqual({ ok: true, summary: 'Winds over 74 mph arrive Tuesday morning.' });
+    expect(validateWithFirstSentence('Winds of 100 mph arrive Tuesday. More text.', source)).toMatchObject({ ok: false });
+  });
+
   test('rejects invented numbers, long output and empty output', () => {
     expect(validateSummary('Winds of 100 mph arrive Tuesday.', source)).toMatchObject({ ok: false, reason: 'number-not-in-source:100' });
-    expect(validateSummary('one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen', source)).toMatchObject({ ok: false, reason: 'too-long' });
+    expect(validateSummary('one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one', source)).toMatchObject({ ok: false, reason: 'too-long' });
+    // 15 words is the prompt target; up to 20 is accepted (models routinely land at 16–18).
+    expect(validateSummary('Typhoon Sinlaku will bring strong winds to Rota, Tinian, and Saipan starting Monday, worsening into Tuesday morning.', source).ok).toBe(true);
     expect(validateSummary('   ', source)).toMatchObject({ ok: false, reason: 'empty' });
     expect(validateSummary('Stay inside. Winds are coming.', source)).toMatchObject({ ok: false, reason: 'multi-sentence' });
   });
