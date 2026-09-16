@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "nmi-typhoon-watch",
+    "name": "NMI Typhoon Watch",
     "slug": "nmi-typhoon-watch",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,17 @@
     "scheme": "nmityphoonwatch",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "supportsTablet": false,
+      "bundleIdentifier": "mp.gov.nmityphoonwatch",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "processing"
+        ],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "com.expo.modules.backgroundtask.processing"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,20 +27,40 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "mp.gov.nmityphoonwatch"
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {}
+      ],
       [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
+        }
+      ],
+      "expo-sqlite",
+      "expo-background-task",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "NMI Typhoon Watch uses your location only to sort shelters by distance. It works without a signal and is never uploaded.",
+          "locationAlwaysAndWhenInUsePermission": "NMI Typhoon Watch uses your location only to sort shelters by distance. It works without a signal and is never uploaded."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0B2545",
+          "defaultChannel": "typhoon-alerts"
         }
       ]
     ],

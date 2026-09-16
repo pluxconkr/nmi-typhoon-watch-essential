@@ -1,0 +1,70 @@
+{
+  "version": "2026.09.1",
+  "note": "100% static. Bundled with the app so it opens with no signal on first launch. Every entry cites public FEMA / CDC / American Red Cross / NWS guidance. No medical judgement is included; 911 and HSEM are pinned at the top of the screen.",
+  "entries": [
+    {
+      "id": "power-out",
+      "section": "during",
+      "title": "The power went out",
+      "body": "Keep the fridge and freezer closed. A fridge stays cold about 4 hours; a full freezer stays frozen about 48 hours (24 hours if half full). Use flashlights, not candles. Unplug appliances and electronics so a surge does not damage them when power returns. If you run a generator, keep it OUTSIDE, at least 20 feet from windows, doors and vents — never in the house or garage. Do not touch a breaker panel that is wet or while standing in water.",
+      "source": "FEMA (ready.gov) · FDA/USDA · CDC · American Red Cross",
+      "sourceUrl": "https://www.ready.gov/power-outages"
+    },
+    {
+      "id": "no-water",
+      "section": "during",
+      "title": "There is no water",
+      "body": "Bathtub water is for flushing and washing only — do not drink it. If you must use tap or rain water for drinking, filter it through a clean cloth if cloudy, then boil it at a rolling boil for 1 full minute. Or add 1/8 teaspoon of plain bleach per gallon and wait 30 minutes. Do not drink tap water after the storm until officials say it is safe. Water distribution points are listed on the Alert tab once the all clear is given.",
+      "source": "CDC · FEMA (ready.gov) · NWS",
+      "sourceUrl": "https://www.cdc.gov/water-emergency/about/index.html"
+    },
+    {
+      "id": "wind-stopped",
+      "section": "during",
+      "title": "The wind suddenly stopped",
+      "body": "You may be in the eye of the storm. DO NOT GO OUTSIDE. There will be a short period of calm, then the wind returns quickly from the opposite direction at full strength. During Yutu (2018) and Sinlaku (2026) the eye passed directly over Tinian and southern Saipan. Stay inside until officials announce the all clear.",
+      "source": "NWS Hurricane Safety",
+      "sourceUrl": "https://www.weather.gov/safety/hurricane-action"
+    },
+    {
+      "id": "roof-window",
+      "section": "during",
+      "title": "A window or the roof broke",
+      "body": "Move to a small inside room with no windows on the lowest floor — a bathroom, closet or hallway. Put as many walls between you and the outside as you can. Get under a sturdy table and cover yourself with a mattress or thick blankets to block flying debris. Close all interior doors. Do not try to repair anything until the all clear.",
+      "source": "NWS · NWS Storm Prediction Center · American Red Cross",
+      "sourceUrl": "https://www.weather.gov/safety/hurricane-action"
+    },
+    {
+      "id": "family-contact",
+      "section": "during",
+      "title": "I cannot reach my family",
+      "body": "Text first. Text messages often get through when calls cannot, and they use less battery. Save phone calls for emergencies. Go to the meeting place you agreed on beforehand. If you still cannot find someone after the storm, the American Red Cross can help: 1-800-RED CROSS (1-800-733-2767); Red Cross Saipan office (670) 234-3459.",
+      "source": "FEMA (ready.gov) · American Red Cross",
+      "sourceUrl": "https://www.ready.gov/hurricanes"
+    },
+    {
+      "id": "water-inside",
+      "section": "during",
+      "title": "Water is coming into the house",
+      "body": "If you can reach the main breaker while standing on a DRY floor, turn the power off. Never step into water to reach it. Do not touch electrical equipment that is wet. Move to a higher floor or higher ground. Do not climb into a closed attic — you can be trapped by rising water. Do not walk in floodwater; it can hide debris and live wires.",
+      "source": "CDC · FEMA (ready.gov)",
+      "sourceUrl": "https://www.cdc.gov/natural-disasters/response/what-to-do-protect-yourself-from-electrical-hazards.html"
+    },
+    {
+      "id": "downed-lines",
+      "section": "after",
+      "title": "After the storm: wires, water, generators",
+      "body": "Never touch a fallen power line. Stay at least 35 feet away from downed wires and anything they touch — including puddles — and report them. Do not drink tap water until officials say it is safe; use bottled or boiled water. Run generators outside only, 20 feet from any window, door or vent: carbon monoxide has no smell and kills after every storm.",
+      "source": "CDC · American Red Cross · NWS",
+      "sourceUrl": "https://www.cdc.gov/hurricanes/safety/how-to-safely-stay-safe-after-a-hurricane-or-other-tropical-storm.html"
+    },
+    {
+      "id": "fema-apply",
+      "section": "after",
+      "title": "What FEMA will ask for",
+      "body": "Take photos and video of ALL damage, inside and outside, before you throw anything away — including inside closets and cabinets. Keep receipts for repairs and replacements. To apply (DisasterAssistance.gov, the FEMA app, or 1-800-621-3362) you will need: your Social Security number, the address at the time of the disaster and where you are staying now, a general list of damage and losses, household income, insurance information, and bank details for direct deposit. Proof you live there can be a utility bill, lease, ID with address or a pay stub. Keep these in the sealed document bag from your checklist.",
+      "source": "FEMA",
+      "sourceUrl": "https://www.fema.gov/fact-sheet/how-apply-assistance"
+    }
+  ]
+}

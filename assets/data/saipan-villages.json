@@ -1,0 +1,187 @@
+{
+ "attribution": "\u00a9 OpenStreetMap contributors (ODbL); Chalan Laulau & Fina Sisu from GeoNames.org (CC BY 4.0); As Teo from Wikidata (CC0)",
+ "villages": [
+  {
+   "name": "Garapan",
+   "lat": 15.207085,
+   "lng": 145.720861,
+   "approx": false,
+   "source": "OSM node/9429871410 (place=city)"
+  },
+  {
+   "name": "Susupe",
+   "lat": 15.1577,
+   "lng": 145.709857,
+   "approx": false,
+   "source": "OSM node/9812788491 (town)"
+  },
+  {
+   "name": "Chalan Kanoa",
+   "lat": 15.137775,
+   "lng": 145.717131,
+   "approx": false,
+   "source": "OSM node/9812788494 (suburb)"
+  },
+  {
+   "name": "San Antonio",
+   "lat": 15.133694,
+   "lng": 145.695695,
+   "approx": false,
+   "source": "OSM node/9812788500 (neighbourhood)"
+  },
+  {
+   "name": "Koblerville",
+   "lat": 15.123441,
+   "lng": 145.70372,
+   "approx": false,
+   "source": "OSM node/9812788499 (suburb)"
+  },
+  {
+   "name": "San Vicente",
+   "lat": 15.155339,
+   "lng": 145.73919,
+   "approx": false,
+   "source": "OSM node/9812788489 (suburb)"
+  },
+  {
+   "name": "Dandan",
+   "lat": 15.134129,
+   "lng": 145.735585,
+   "approx": false,
+   "source": "OSM node/9812788495 (suburb)"
+  },
+  {
+   "name": "Kagman",
+   "lat": 15.172391,
+   "lng": 145.77538,
+   "approx": false,
+   "source": "OSM node/9812788482 (suburb)"
+  },
+  {
+   "name": "Capitol Hill",
+   "lat": 15.210661,
+   "lng": 145.752444,
+   "approx": false,
+   "source": "OSM node/1974188866 (village; alt \"Capital Hill\", old \"Army "
+  },
+  {
+   "name": "Tanapag",
+   "lat": 15.241886,
+   "lng": 145.757231,
+   "approx": false,
+   "source": "OSM node/9812788474 (suburb)"
+  },
+  {
+   "name": "San Roque",
+   "lat": 15.248345,
+   "lng": 145.773367,
+   "approx": false,
+   "source": "OSM node/9812788475 (suburb)"
+  },
+  {
+   "name": "As Lito",
+   "lat": 15.120942,
+   "lng": 145.715775,
+   "approx": false,
+   "source": "OSM node/12874678648 (village)"
+  },
+  {
+   "name": "Oleai",
+   "lat": 15.173945,
+   "lng": 145.714333,
+   "approx": false,
+   "source": "OSM node/9812788486 (suburb)"
+  },
+  {
+   "name": "Gualo Rai",
+   "lat": 15.189972,
+   "lng": 145.723561,
+   "approx": false,
+   "source": "OSM node/9812788487 (suburb)"
+  },
+  {
+   "name": "Navy Hill",
+   "lat": 15.208571,
+   "lng": 145.737344,
+   "approx": false,
+   "source": "OSM node/9812788478 (suburb)"
+  },
+  {
+   "name": "Marpi",
+   "lat": 15.270203,
+   "lng": 145.798487,
+   "approx": false,
+   "source": "OSM node/13906082896 (hamlet)"
+  },
+  {
+   "name": "San Jose",
+   "lat": 15.167206,
+   "lng": 145.71123,
+   "approx": false,
+   "source": "OSM node/9812788490 (neighbourhood)"
+  },
+  {
+   "name": "Chalan Laulau",
+   "lat": 15.18078,
+   "lng": 145.71382,
+   "approx": false,
+   "source": "GeoNames 13645573 \"Chalan Laulau Village\" (P.PPL, pop 1087) "
+  },
+  {
+   "name": "Papago",
+   "lat": 15.178628,
+   "lng": 145.750208,
+   "approx": false,
+   "source": "OSM node/9812788480 (suburb)"
+  },
+  {
+   "name": "Chalan Piao",
+   "lat": 15.146039,
+   "lng": 145.702841,
+   "approx": false,
+   "source": "OSM node/9812788492 (town)"
+  },
+  {
+   "name": "Fina Sisu",
+   "lat": 15.14558,
+   "lng": 145.71927,
+   "approx": false,
+   "source": "GeoNames 7838878 \"Fina Sisu Hamlet\" (P.PPL) \u2014 NOT in OSM (on"
+  },
+  {
+   "name": "As Matuis",
+   "lat": 15.251554,
+   "lng": 145.786006,
+   "approx": false,
+   "source": "OSM node/9812788476 (suburb)"
+  },
+  {
+   "name": "Sadog Tasi",
+   "lat": 15.222298,
+   "lng": 145.742573,
+   "approx": true,
+   "source": "centre of OSM way/234852031 \"Sadog Tasi Drive\" \u2014 no place no"
+  },
+  {
+   "name": "As Teo",
+   "lat": 15.196389,
+   "lng": 145.765,
+   "approx": false,
+   "source": "Wikidata Q119840292 \"As Teo, settlement in Saipan\" (OSM \"As "
+  },
+  {
+   "name": "Talofofo",
+   "lat": 15.207993,
+   "lng": 145.767532,
+   "approx": true,
+   "source": "centre of OSM way/1066893485 \"Talofofo Road\"; GeoNames hill "
+  },
+  {
+   "name": "I Denni",
+   "lat": 15.2225,
+   "lng": 145.746,
+   "approx": true,
+   "source": "**ESTIMATE** \u2014 no object in OSM, Nominatim, GeoNames, Wikida"
+  }
+ ]
+}

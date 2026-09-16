@@ -1,0 +1,137 @@
+{
+ "version": "2026.09.16",
+ "lastVerified": "2026-05-10",
+ "note": "Water filling stations and distribution points published by CUC / CNMI JIC after Super Typhoon Sinlaku (Apr-May 2026) and Typhoon Bavi (Jul 2026). Points change after every storm; the app always shows the saved date. Sources: docs/shelter-sources.md",
+ "points": [
+  {
+   "id": "wp-cuc-puerto-rico-peace-park",
+   "name": "CUC water filling station - Puerto Rico (Puerto Rico Road, in front of Gov. Eloy S. Inos Peace Park)",
+   "village": "Puerto Rico",
+   "hours": "8:00 AM - 11:00 PM daily",
+   "lat": 15.22194,
+   "lng": 145.73183,
+   "lastVerified": "2026-05-08",
+   "note": "Sinlaku: listed by JIC 25 Apr - 8 May 2026; reopened for Bavi 7-11 Jul 2026 per CUC advisory, closed 12 Jul 2026"
+  },
+  {
+   "id": "wp-cuc-chalan-kanoa-wsr",
+   "name": "CUC water filling station - Chalan Kanoa (Dr. Torres Drive, in front of William S. Reyes Elementary School)",
+   "village": "Chalan Kanoa",
+   "hours": "8:00 AM - 11:00 PM daily",
+   "lat": 15.1418,
+   "lng": 145.70278,
+   "lastVerified": "2026-05-08",
+   "note": "Sinlaku: JIC 25 Apr - 8 May 2026; reopened for Bavi 7-11 Jul 2026"
+  },
+  {
+   "id": "wp-cuc-san-vicente-tuturam",
+   "name": "CUC water filling station - San Vicente (Tuturam Drive, behind San Vicente Central Park)",
+   "village": "San Vicente",
+   "hours": "8:00 AM - 11:00 PM daily",
+   "lat": 15.15343,
+   "lng": 145.73948,
+   "lastVerified": "2026-05-08",
+   "note": "Pin is approximate. Sinlaku: JIC 25 Apr - 8 May 2026; reopened for Bavi 7-11 Jul 2026"
+  },
+  {
+   "id": "wp-cuc-kagman-chacha-road",
+   "name": "CUC water filling station - Kagman (Chacha Road, across from Santa Soledad Church)",
+   "village": "Kagman",
+   "hours": "8:00 AM - 11:00 PM daily",
+   "lat": 15.17239,
+   "lng": 145.77538,
+   "lastVerified": "2026-04-30",
+   "note": "Pin is approximate. Sinlaku: JIC 25-30 Apr 2026, closed 1 May 2026; reopened for Bavi 7-11 Jul 2026"
+  },
+  {
+   "id": "wp-cuc-capitol-hill",
+   "name": "CUC water filling station - Capitol Hill (Capitol Hill Road)",
+   "village": "Capitol Hill",
+   "hours": "8:00 AM - 6:00 PM daily",
+   "lat": 15.21066,
+   "lng": 145.75244,
+   "lastVerified": "2026-05-07",
+   "note": "Pin is approximate. Sinlaku: JIC 25 Apr - 7 May 2026; dropped from list 8 May 2026"
+  },
+  {
+   "id": "wp-cuc-koblerville-tinaktak",
+   "name": "CUC water filling station - Koblerville (Tinaktak Drive)",
+   "village": "Koblerville",
+   "hours": "8:00 AM - 6:00 PM daily",
+   "lat": 15.12344,
+   "lng": 145.70372,
+   "lastVerified": "2026-04-30",
+   "note": "Pin is approximate. Sinlaku: JIC 25-30 Apr 2026, closed 1 May 2026"
+  },
+  {
+   "id": "wp-ro-paupau-beach",
+   "name": "FEMA / CNMI / U.S. Air Force reverse-osmosis potable water - Paupau Beach",
+   "village": "San Roque",
+   "hours": "7:00 AM - 7:00 PM daily, up to 100 gallons per vehicle",
+   "lat": 15.25262,
+   "lng": 145.77664,
+   "lastVerified": "2026-05-10",
+   "note": "Sinlaku: JIC 2-10 May 2026"
+  },
+  {
+   "id": "wp-ro-hopwood-middle-school",
+   "name": "FEMA / CNMI / U.S. Air Force reverse-osmosis potable water - Hopwood Middle School",
+   "village": "San Antonio / Chalan Piao",
+   "hours": "7:00 AM - 7:00 PM daily, up to 100 gallons per vehicle",
+   "lat": 15.14005,
+   "lng": 145.6988,
+   "lastVerified": "2026-05-10",
+   "note": "Sinlaku: JIC 2-10 May 2026"
+  },
+  {
+   "id": "wp-garapan-fishing-base",
+   "name": "Free potable water - Garapan Fishing Base (Samaritan's Purse / JIC); also HSEM-FEMA bottled-water & MRE C-POD on 25 Apr and 8 May 2026",
+   "village": "Garapan",
+   "hours": "Potable water 10:00 AM - 6:00 PM daily, no limit",
+   "lat": 15.20253,
+   "lng": 145.71927,
+   "lastVerified": "2026-05-10",
+   "note": "JIC 8-10 May 2026); C-POD from 9:00 AM until supplies last. Yutu 2018 and Soudelor 2015 distribution site too."
+  },
+  {
+   "id": "wp-sugar-dock",
+   "name": "Free potable water - Sugar Dock (Bantalan), Chalan Kanoa (Samaritan's Purse / JIC)",
+   "village": "Chalan Kanoa / Susupe",
+   "hours": "10:00 AM - 6:00 PM daily, no limit",
+   "lat": 15.15142,
+   "lng": 145.6995,
+   "lastVerified": "2026-05-10",
+   "note": "JIC 8-10 May 2026); Samaritan's Purse station opened 24 Apr 2026 with free jerry cans"
+  },
+  {
+   "id": "wp-pod-airport-field",
+   "name": "HSEM-FEMA bottled drinking water & MRE C-POD - Airport Field",
+   "village": "As Lito / Isley",
+   "hours": "9:00 AM until supplies last on 23 Apr and 4 May 2026",
+   "lat": 15.12049,
+   "lng": 145.72963,
+   "lastVerified": "2026-05-04",
+   "note": "Pin is approximate. one case per household/vehicle on 23 Apr"
+  },
+  {
+   "id": "wp-pod-koblerville-youth-center",
+   "name": "HSEM-FEMA bottled drinking water & MRE C-POD - Koblerville Youth Center",
+   "village": "Koblerville",
+   "hours": "9:00 AM until supplies last on 24 Apr and 6 May 2026",
+   "lat": 15.12344,
+   "lng": 145.70372,
+   "lastVerified": "2026-05-06",
+   "note": "Pin is approximate. "
+  },
+  {
+   "id": "wp-pod-kagman-staging",
+   "name": "FEMA/HSEM staging & distribution site - Kagman (water and food rations; door-to-door MRE/water distribution 1 May 2026)",
+   "village": "Kagman",
+   "hours": "From 18 Apr 2026",
+   "lat": 15.17239,
+   "lng": 145.77538,
+   "lastVerified": "2026-05-01",
+   "note": "Pin is approximate. hours not published); door-to-door 1 May 2026 from 9:00 AM"
+  }
+ ]
+}
