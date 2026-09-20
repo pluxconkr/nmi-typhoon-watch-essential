@@ -4,17 +4,17 @@
  */
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { formatDistance, haversineKm } from '@/domain/geo';
 import { isStale, relativeAgo } from '@/domain/time';
 import type { Shelter } from '@/domain/types';
 import { acquireLocation } from '@/services/location';
 import { isOfflineNow, useAppState } from '@/store/appStore';
-import { IslandMap } from '@/ui/IslandMap';
-import { Card, LinkRow, Pill, SectionLabel, Small, Xs } from '@/ui/primitives';
+import { IslandMap, MapLegend } from '@/ui/IslandMap';
+import { Callout, Cell, Group, SectionFooter, SectionHeader, Segmented, Subhead } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
-import { colors, fonts } from '@/ui/theme';
+import { GUTTER, colors } from '@/ui/theme';
 
 type Filter = 'all' | 'medical';
 
@@ -48,120 +48,95 @@ export default function ShelterScreen() {
 
   const grouped = useMemo(() => {
     if (location) return null;
-    const m = new Map<string, { s: Shelter; km: null }[]>();
+    const m = new Map<string, Shelter[]>();
     for (const x of list) {
       const key = `${x.s.island === 'saipan' ? 'Saipan' : x.s.island === 'tinian' ? 'Tinian' : 'Rota'} · ${x.s.village}`;
-      m.set(key, [...(m.get(key) ?? []), { s: x.s, km: null }]);
+      m.set(key, [...(m.get(key) ?? []), x.s]);
     }
     return m;
   }, [list, location]);
 
-  const stamp = source === 'network' && meta?.fetchedAt ? `Shelters saved · ${relativeAgo(meta.fetchedAt)}` : 'Bundled with the app';
   const stale = source === 'network' && meta?.fetchedAt ? isStale(meta.fetchedAt) : false;
-  const mapWidth = Math.min(width - 32, 600);
-  const noPets = household.pets > 0;
+  const mapWidth = Math.min(width - GUTTER * 2, 600);
+  const gpsLine =
+    locStatus === 'granted' && location
+      ? 'GPS works without a signal. Distances are straight-line from your position.'
+      : locStatus === 'denied'
+        ? 'Location permission is off — shelters are grouped by village instead of sorted by distance.'
+        : locStatus === 'requesting'
+          ? 'Getting your position from GPS…'
+          : 'No GPS fix yet — shelters are grouped by village.';
+  const open = (s: Shelter) => router.push({ pathname: '/shelter/[id]', params: { id: s.shelterId } });
+  const sub = (s: Shelter) => [s.village, s.designCapacity ? `space ${s.designCapacity}` : null, s.wheelchair ? 'accessible' : null].filter(Boolean).join(' · ');
 
   return (
-    <Screen testID="shelter">
+    <Screen largeTitle="Shelter" subtitle={`${shelters.length} shelters · Saipan, Tinian, Rota`} testID="shelter">
       {offline && source === 'bundle' ? (
-        <Card tone="red">
-          <SectionLabel color={colors.red}>No signal — showing the list that came with the app</SectionLabel>
-          <Small>This is the built-in copy, not a live download. It may be older than the latest HSEM announcement, but it is never blank.</Small>
-        </Card>
+        <Callout icon="offline" tone="red" title="No signal — showing the list that came with the app">
+          <Subhead>This is the built-in copy, not a live download. It may be older than the latest HSEM announcement, but it is never blank.</Subhead>
+        </Callout>
       ) : null}
       {stale ? (
-        <Card tone="amber">
-          <SectionLabel color={colors.amber}>Shelter list is older than 7 days</SectionLabel>
-          <Small>Refresh it while you have signal. The old list stays usable until then.</Small>
-        </Card>
+        <Callout icon="clock" tone="amber" title="Shelter list is older than 7 days">
+          <Subhead>Refresh it while you have signal. The old list stays usable until then.</Subhead>
+        </Callout>
       ) : null}
 
-      <IslandMap shelters={shelters} location={location} selectedId={selected} onSelect={(s) => setSelected(s.shelterId)} width={mapWidth} height={Math.round(mapWidth * 0.78)} stamp={stamp} />
-      <Xs style={{ marginTop: 8, marginBottom: 12 }}>
-        {locStatus === 'granted' && location
-          ? 'GPS works without a signal. Distances are straight-line from your position.'
-          : locStatus === 'denied'
-            ? 'Location permission is off, so shelters are grouped by village instead of sorted by distance.'
-            : locStatus === 'requesting'
-              ? 'Getting your position from GPS…'
-              : 'No GPS fix yet — shelters are grouped by village.'}
-      </Xs>
-
-      <View style={styles.chips}>
-        <Chip on={filter === 'all'} label="All shelters" onPress={() => setFilter('all')} />
-        <Chip on={filter === 'medical'} label="Elderly / medical needs" onPress={() => setFilter('medical')} />
+      <View style={{ marginTop: 8 }}>
+        <IslandMap shelters={shelters} location={location} selectedId={selected} onSelect={(s) => setSelected(s.shelterId)} width={mapWidth} height={Math.round(mapWidth * 0.8)} />
       </View>
-      {noPets ? (
-        <Card tone="amber">
-          <Small>
-            <Small style={{ fontWeight: '800', color: colors.ink }}>Pets:</Small> CNMI public shelters accept only certified service animals. Plan to leave pets with family or friends in a sturdy building, with the pet food and water from your checklist.
-          </Small>
-        </Card>
+      <MapLegend hasPosition={!!location} />
+      <SectionFooter style={{ paddingHorizontal: 0 }}>{gpsLine}</SectionFooter>
+
+      <View style={styles.filter}>
+        <Segmented<Filter>
+          label="Shelter filter"
+          options={[
+            { value: 'all', label: 'All shelters' },
+            { value: 'medical', label: 'Elderly / medical needs' },
+          ]}
+          value={filter}
+          onChange={setFilter}
+        />
+      </View>
+      {household.pets > 0 ? (
+        <Callout icon="pet" tone="amber" title="Pets: service animals only">
+          <Subhead>CNMI public shelters accept only certified service animals. Plan to leave pets with family or friends in a sturdy building, with the pet food and water from your checklist.</Subhead>
+        </Callout>
       ) : null}
 
-      <Card>
-        <SectionLabel>{location ? `Nearest shelters (${list.length})` : `Shelters by village (${list.length})`}</SectionLabel>
-        {grouped
-          ? Array.from(grouped.entries()).map(([village, rows]) => (
-              <View key={village}>
-                <Text style={styles.groupTitle}>{village}</Text>
-                {rows.map((r) => (
-                  <ShelterRow key={r.s.shelterId} s={r.s} km={null} onPress={() => router.push({ pathname: '/shelter/[id]', params: { id: r.s.shelterId } })} />
-                ))}
-              </View>
-            ))
-          : list.map((r) => <ShelterRow key={r.s.shelterId} s={r.s} km={r.km} onPress={() => router.push({ pathname: '/shelter/[id]', params: { id: r.s.shelterId } })} />)}
-      </Card>
+      {grouped ? (
+        Array.from(grouped.entries()).map(([village, rows]) => (
+          <View key={village}>
+            <SectionHeader>{village}</SectionHeader>
+            <Group>
+              {rows.map((s, i) => (
+                <Cell key={s.shelterId} icon="shelter" iconColor={colors.green} title={s.name} subtitle={sub(s)} accessory="chevron" onPress={() => open(s)} accessibilityLabel={`${s.name}, ${s.village}`} last={i === rows.length - 1} />
+              ))}
+            </Group>
+          </View>
+        ))
+      ) : (
+        <>
+          <SectionHeader right="Straight-line distance">Nearest shelters ({list.length})</SectionHeader>
+          <Group>
+            {list.map((r, i) => (
+              <Cell key={r.s.shelterId} icon="shelter" iconColor={colors.green} title={r.s.name} subtitle={sub(r.s)} value={r.km !== null ? formatDistance(r.km) : undefined} accessory="chevron" onPress={() => open(r.s)} accessibilityLabel={`${r.s.name}, ${r.s.village}${r.km !== null ? `, ${formatDistance(r.km)} away` : ''}`} last={i === list.length - 1} />
+            ))}
+          </Group>
+        </>
+      )}
+      {grouped ? <SectionFooter style={{ paddingHorizontal: 0, marginTop: -4 }}>{`Shelters by village (${list.length}) · grouped until GPS has a fix`}</SectionFooter> : null}
 
-      <LinkRow title="Manage offline data" subtitle={source === 'network' && meta?.fetchedAt ? `Shelters saved · ${relativeAgo(meta.fetchedAt)}` : 'Bundled copy · check for a newer list when online'} onPress={() => router.push('/downloads')} right={<Pill tone="green">Ready</Pill>} />
-      <Xs style={{ marginBottom: 18 }}>
-        Capacity shown is <Xs style={{ fontWeight: '800', color: colors.ink }}>design capacity</Xs>, not live availability. For transport or confirmation call the HSEM State Warning Point at (670) 237-8000 or (670) 664-8000.
-      </Xs>
+      <SectionHeader>Data</SectionHeader>
+      <Group>
+        <Cell icon="download" iconColor={colors.green} title="Manage offline data" subtitle={source === 'network' && meta?.fetchedAt ? `Shelters saved ${relativeAgo(meta.fetchedAt)}` : 'Bundled copy · check for a newer list when online'} accessory="chevron" onPress={() => router.push('/downloads')} last />
+      </Group>
+      <SectionFooter>Capacity shown is design capacity, not live availability. For transport or confirmation call the HSEM State Warning Point at (670) 237-8000 or (670) 664-8000.</SectionFooter>
     </Screen>
   );
 }
 
-function Chip({ on, label, onPress }: { on: boolean; label: string; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} style={[styles.chip, on && styles.chipOn]}>
-      <Text style={[styles.chipText, on && styles.chipTextOn]}>{on ? '✓ ' : ''}{label}</Text>
-    </Pressable>
-  );
-}
-
-function ShelterRow({ s, km, onPress }: { s: Shelter; km: number | null; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${s.name}, ${s.village}${km !== null ? `, ${formatDistance(km)} away` : ''}`} style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
-      <View style={styles.icon}>
-        <Text style={styles.iconText}>{s.name.charAt(0)}</Text>
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.name}>{s.name}</Text>
-        <Xs>
-          {s.village}
-          {s.designCapacity ? ` · space ${s.designCapacity}` : ''}
-          {s.wheelchair ? ' · accessible' : ''}
-        </Xs>
-      </View>
-      <View style={{ alignItems: 'flex-end' }}>
-        {km !== null ? <Text style={styles.km}>{formatDistance(km)}</Text> : null}
-        <Text style={styles.chev}>›</Text>
-      </View>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 12 },
-  chip: { borderRadius: 999, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: colors.line2, minHeight: 40, justifyContent: 'center' },
-  chipOn: { backgroundColor: colors.greenSoft },
-  chipText: { fontSize: 13, fontWeight: '700', color: colors.ink2 },
-  chipTextOn: { color: colors.green },
-  groupTitle: { fontSize: 12, fontWeight: '800', color: colors.ink3, marginTop: 10, marginBottom: 2, letterSpacing: 0.5 },
-  row: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.line2, minHeight: 56 },
-  icon: { width: 38, height: 38, borderRadius: 10, backgroundColor: colors.navySoft, alignItems: 'center', justifyContent: 'center' },
-  iconText: { color: colors.navy, fontWeight: '800', fontSize: 15 },
-  name: { fontSize: 15, fontWeight: '700', color: colors.ink },
-  km: { fontFamily: fonts.mono, fontSize: 13, fontWeight: '700', color: colors.navy },
-  chev: { fontSize: 18, color: colors.ink3, textAlign: 'right' },
+  filter: { marginTop: 10, marginBottom: 2 },
 });

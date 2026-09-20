@@ -9,9 +9,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { HOUSEHOLD_LIMITS, PREP_DAY_OPTIONS, diffChecklists } from '@/domain/rules';
 import type { Household, PrepDays } from '@/domain/types';
 import { actions, useAppState } from '@/store/appStore';
-import { Button, Card, Pill, SectionLabel, Segmented, Stepper, Toggle, Xs } from '@/ui/primitives';
+import { Button, Group, SectionFooter, SectionHeader, Segmented, Stepper, Toggle } from '@/ui/primitives';
 import { Screen, goBackOr } from '@/ui/Screen';
-import { colors, fonts } from '@/ui/theme';
+import { CELL_PAD, colors, tabular, type } from '@/ui/theme';
 
 export default function HouseholdScreen() {
   const router = useRouter();
@@ -26,48 +26,50 @@ export default function HouseholdScreen() {
   };
 
   return (
-    <Screen title="Your household">
-      <Pill tone="navy" style={{ marginBottom: 10 }}>
-        S-05 · EDIT
-      </Pill>
-      <Card>
-        <Stepper label="People in household" value={draft.people} min={HOUSEHOLD_LIMITS.people.min} max={HOUSEHOLD_LIMITS.people.max} onChange={(v) => set('people', v)} />
-        <Stepper label="Elderly or medical needs" value={draft.elders} min={HOUSEHOLD_LIMITS.elders.min} max={HOUSEHOLD_LIMITS.elders.max} onChange={(v) => set('elders', v)} />
-        <Stepper label="Infants under 2" value={draft.infants} min={HOUSEHOLD_LIMITS.infants.min} max={HOUSEHOLD_LIMITS.infants.max} onChange={(v) => set('infants', v)} />
-        <Stepper label="Pets" value={draft.pets} min={HOUSEHOLD_LIMITS.pets.min} max={HOUSEHOLD_LIMITS.pets.max} onChange={(v) => set('pets', v)} />
-        <Toggle label="Generator at home" value={draft.generator} onChange={(v) => set('generator', v)} />
-      </Card>
-      <Card>
-        <SectionLabel>Supply period</SectionLabel>
-        <Segmented<PrepDays> label="Supply period" options={PREP_DAY_OPTIONS.map((d) => ({ value: d, label: `${d} days` }))} value={draft.prepDays} onChange={(v) => set('prepDays', v)} />
-      </Card>
+    <Screen title="Your household" fallback="/checklist" largeTitle="Your household">
+      <SectionHeader>Who lives with you</SectionHeader>
+      <Group>
+        <Stepper icon="people" label="People in household" value={draft.people} min={HOUSEHOLD_LIMITS.people.min} max={HOUSEHOLD_LIMITS.people.max} onChange={(v) => set('people', v)} />
+        <Stepper icon="elder" label="Elderly or medical needs" value={draft.elders} min={HOUSEHOLD_LIMITS.elders.min} max={HOUSEHOLD_LIMITS.elders.max} onChange={(v) => set('elders', v)} hint="7-day medicine rule, extra water" />
+        <Stepper icon="baby" label="Infants under 2" value={draft.infants} min={HOUSEHOLD_LIMITS.infants.min} max={HOUSEHOLD_LIMITS.infants.max} onChange={(v) => set('infants', v)} hint="Formula & diapers" />
+        <Stepper icon="pet" label="Pets" value={draft.pets} min={HOUSEHOLD_LIMITS.pets.min} max={HOUSEHOLD_LIMITS.pets.max} onChange={(v) => set('pets', v)} hint="Pet food & water" />
+        <Toggle icon="generator" label="Generator at home" value={draft.generator} onChange={(v) => set('generator', v)} hint="Halves batteries, adds fuel" last />
+      </Group>
 
-      <Card style={{ borderColor: diffs.length ? colors.navy3 : colors.line }}>
-        <SectionLabel>What will change</SectionLabel>
+      <SectionHeader>Supply period</SectionHeader>
+      <Group padded>
+        <Segmented<PrepDays> label="Supply period" options={PREP_DAY_OPTIONS.map((d) => ({ value: d, label: `${d} days` }))} value={draft.prepDays} onChange={(v) => set('prepDays', v)} />
+      </Group>
+      <SectionFooter>3 days is the CDC / Red Cross minimum. Saipan outages after Yutu and Sinlaku lasted weeks — 14 days is realistic.</SectionFooter>
+
+      <SectionHeader>What will change</SectionHeader>
+      <Group>
         {diffs.length === 0 ? (
-          <Xs>No changes yet. Adjust a number above.</Xs>
+          <View style={styles.emptyRow}>
+            <Text style={type.subheadline}>No changes yet. Adjust a number above.</Text>
+          </View>
         ) : (
-          diffs.map((d) => (
-            <View key={d.id} style={styles.diffRow} accessibilityLabel={`${d.name}: ${d.from} to ${d.to}`}>
-              <Text style={styles.diffName}>{d.name}</Text>
-              <Text style={styles.diffVal}>
-                <Text style={{ color: colors.ink3 }}>{d.from}</Text> → <Text style={{ color: d.kind === 'removed' ? colors.ink3 : colors.navy, fontWeight: '800' }}>{d.to}</Text>
+          diffs.map((d, i) => (
+            <View key={d.id} style={[styles.diffRow, i !== diffs.length - 1 && styles.separator]} accessibilityLabel={`${d.name}: ${d.from} to ${d.to}`}>
+              <Text style={[type.body, { flexShrink: 1 }]}>{d.name}</Text>
+              <Text style={[type.body, tabular, { color: colors.ink2 }]}>
+                {d.from} <Text style={{ color: colors.ink4 }}>→</Text> <Text style={{ color: d.kind === 'removed' ? colors.ink2 : colors.ink, fontWeight: '600' }}>{d.to}</Text>
               </Text>
             </View>
           ))
         )}
-        <Xs style={{ marginTop: 9 }}>Items you already checked stay checked. If a quantity grows, the checklist shows how much more you need.</Xs>
-      </Card>
+      </Group>
+      <SectionFooter>Items you already checked stay checked. If a quantity grows, the checklist shows how much more you need.</SectionFooter>
 
-      <Button title="Save changes" onPress={save} testID="household-save" />
-      <Button title="Cancel" variant="ghost" style={{ marginTop: 9 }} onPress={() => goBackOr(router, '/checklist')} />
-      <Xs style={{ textAlign: 'center', marginTop: 12 }}>Saved on this phone first. No signal needed.</Xs>
+      <Button title="Save changes" onPress={save} testID="household-save" style={{ marginTop: 8 }} />
+      <Button title="Cancel" variant="ghost" style={{ marginTop: 6 }} onPress={() => goBackOr(router, '/checklist')} />
+      <SectionFooter style={{ textAlign: 'center' }}>Saved on this phone first. No signal needed.</SectionFooter>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  diffRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: colors.line2 },
-  diffName: { fontSize: 14, fontWeight: '700', color: colors.ink, flexShrink: 1 },
-  diffVal: { fontFamily: fonts.mono, fontSize: 13.5, color: colors.ink },
+  emptyRow: { paddingHorizontal: CELL_PAD, paddingVertical: 12 },
+  diffRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingVertical: 11, marginLeft: CELL_PAD, paddingRight: CELL_PAD },
+  separator: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
 });

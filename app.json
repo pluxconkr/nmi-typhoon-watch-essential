@@ -62,7 +62,8 @@
           "color": "#0B2545",
           "defaultChannel": "typhoon-alerts"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,63 +1,87 @@
 /**
- * Design tokens. Three colours only (spec): Navy = information, Red = warning / action needed,
- * Green = done. Amber is reserved for stale-data warnings. Everything else is ink/line/surface.
+ * Design tokens — native iOS idiom (grouped inset lists, SF Pro, one accent), light only.
+ *
+ * Three semantic colours (spec): Navy = information / tint, Red = warning, Green = done.
+ * Amber is reserved for stale-data warnings. Surfaces follow iOS system grouped backgrounds so the
+ * app reads like a first-party utility, not a themed web page.
  */
-import { Platform } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
-export const colors = {
+export const palette = {
   navy: '#0B2545',
-  navy2: '#123A6B',
-  navy3: '#1D5296',
-  navySoft: '#E8F0FA',
-  navyMuted: '#9EC0EA',
+  navyTint: '#1D5296', // interactive tint (links, buttons, icons)
+  navyFill: '#E7EEF8', // tinted fill for secondary buttons / selection
   red: '#C1121F',
-  redSoft: '#FDECEE',
-  redTint: '#FFF7F8',
+  redFill: '#FBE9EB',
   green: '#12704A',
-  greenSoft: '#E7F4EE',
+  greenFill: '#E4F3EB',
   amber: '#8A5A00',
-  amberSoft: '#FFF6E5',
-  ink: '#0E1726',
-  ink2: '#3C4B61',
-  ink3: '#6B7A90',
-  line: '#DCE3ED',
-  line2: '#EDF1F7',
-  bg: '#F2F5F9',
-  surface: '#FFFFFF',
-  surfaceMuted: '#F8FAFD',
-  offlineBar: '#2A3342',
-  offlineText: '#FFD9DC',
+  amberFill: '#FFF3DB',
+  label: '#0B0F19',
+  secondaryLabel: 'rgba(60,60,67,0.60)',
+  tertiaryLabel: 'rgba(60,60,67,0.30)',
+  separator: 'rgba(60,60,67,0.16)',
+  groupedBackground: '#F2F2F7',
+  secondaryGroupedBackground: '#FFFFFF',
+  fill: 'rgba(120,120,128,0.12)',
   white: '#FFFFFF',
+  slate: '#1C1C1E',
+} as const;
+
+/** Semantic aliases used by screens. */
+export const colors = {
+  navy: palette.navy,
+  tint: palette.navyTint,
+  navySoft: palette.navyFill,
+  red: palette.red,
+  redSoft: palette.redFill,
+  green: palette.green,
+  greenSoft: palette.greenFill,
+  amber: palette.amber,
+  amberSoft: palette.amberFill,
+  ink: palette.label,
+  ink2: palette.secondaryLabel,
+  ink3: palette.secondaryLabel,
+  ink4: palette.tertiaryLabel,
+  line: palette.separator,
+  bg: palette.groupedBackground,
+  surface: palette.secondaryGroupedBackground,
+  fill: palette.fill,
+  offlineBar: '#E5E5EA',
+  offlineText: palette.secondaryLabel,
+  white: palette.white,
+  onDark: 'rgba(255,255,255,0.72)',
 } as const;
 
 export const fonts = {
   sans: Platform.select({ ios: 'System', android: 'sans-serif', default: 'System' }),
-  mono: Platform.select({ ios: 'Menlo', android: 'monospace', web: 'ui-monospace, Menlo, monospace', default: 'monospace' }),
+  /** Big numerals (countdown): SF Rounded on iOS, system elsewhere. Always tabular. */
+  rounded: Platform.select({ ios: 'ui-rounded', android: 'sans-serif', default: 'System' }),
 } as const;
 
-export const radius = { card: 13, button: 11, pill: 999, input: 9 } as const;
+/** Tabular figures so digits never jitter. */
+export const tabular: TextStyle = { fontVariant: ['tabular-nums'] };
 
-export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
+export const radius = { group: 12, button: 12, tag: 6, control: 8 } as const;
 
-/** Minimum touch target (pt). Wet hands, dark rooms, shaking. */
+/** Horizontal page margin (iOS inset grouped). */
+export const GUTTER = 16;
+/** Minimum touch target (pt). */
 export const MIN_TAP = 44;
+/** Cell horizontal padding inside a group. */
+export const CELL_PAD = 16;
 
-/** Minimum body size (pt). */
-export const MIN_BODY = 14;
-
-export const text = {
-  h1: { fontSize: 22, fontWeight: '800' as const, letterSpacing: -0.2, color: colors.ink },
-  h2: { fontSize: 18, fontWeight: '800' as const, color: colors.ink },
-  sectionLabel: { fontSize: 11, letterSpacing: 1.2, textTransform: 'uppercase' as const, color: colors.ink3, fontWeight: '800' as const },
-  body: { fontSize: 15, lineHeight: 21, color: colors.ink },
-  bodyStrong: { fontSize: 15, lineHeight: 21, color: colors.ink, fontWeight: '700' as const },
-  small: { fontSize: 13, lineHeight: 18, color: colors.ink2 },
-  xs: { fontSize: 12, lineHeight: 17, color: colors.ink3 },
-  mono: { fontFamily: fonts.mono, fontSize: 13, color: colors.navy, fontWeight: '700' as const },
+/** iOS text styles (sizes at default Dynamic Type). Body ≥ 15 per spec. */
+export const type = {
+  largeTitle: { fontSize: 28, lineHeight: 34, fontWeight: '700' as const, letterSpacing: -0.4, color: colors.ink },
+  title1: { fontSize: 26, lineHeight: 32, fontWeight: '700' as const, letterSpacing: -0.3, color: colors.ink },
+  title2: { fontSize: 22, lineHeight: 28, fontWeight: '700' as const, letterSpacing: -0.2, color: colors.ink },
+  title3: { fontSize: 20, lineHeight: 25, fontWeight: '600' as const, letterSpacing: -0.2, color: colors.ink },
+  headline: { fontSize: 17, lineHeight: 22, fontWeight: '600' as const, letterSpacing: -0.41, color: colors.ink },
+  body: { fontSize: 17, lineHeight: 22, fontWeight: '400' as const, letterSpacing: -0.41, color: colors.ink },
+  callout: { fontSize: 16, lineHeight: 21, fontWeight: '400' as const, letterSpacing: -0.32, color: colors.ink },
+  subheadline: { fontSize: 15, lineHeight: 20, fontWeight: '400' as const, letterSpacing: -0.24, color: colors.ink2 },
+  footnote: { fontSize: 13, lineHeight: 18, fontWeight: '400' as const, letterSpacing: -0.08, color: colors.ink2 },
+  caption: { fontSize: 12, lineHeight: 16, fontWeight: '400' as const, color: colors.ink2 },
+  sectionHeader: { fontSize: 13, lineHeight: 18, fontWeight: '400' as const, letterSpacing: -0.08, textTransform: 'uppercase' as const, color: colors.ink2 },
 } as const;
-
-export const shadow = Platform.select({
-  ios: { shadowColor: colors.navy, shadowOpacity: 0.06, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
-  android: { elevation: 1 },
-  default: {},
-});

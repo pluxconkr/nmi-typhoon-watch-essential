@@ -1,24 +1,36 @@
 /**
  * S-01 Alert · timeline (tab 1, home). Answers only: how many hours are left, and what to do today.
  * Phase variants: none (calm) · before · during · after. Official text is never shown here (S-02 only).
+ * Layout follows Apple Weather: large title, one alert row with a chevron, then grouped content.
  */
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import * as Linking from 'expo-linking';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { waterPointRepo } from '@/data/repos';
 import { CONTACTS } from '@/domain/contacts';
 import { extractCategory, extractStormName } from '@/domain/nws';
-import { formatChst, formatChstStamp, isStale, relativeAgo } from '@/domain/time';
+import { formatChstShort, formatChstStamp, isStale, relativeAgo } from '@/domain/time';
 import type { PrepWindow, StoredAlert } from '@/domain/types';
 import { AFTER_TASKS, DURING_TASKS, WINDOW_TASKS } from '@/domain/windows';
+import { applyDemoScenario } from '@/services/demo';
 import { refreshAll } from '@/services/refresh';
 import { actions, isOfflineNow, useAppState } from '@/store/appStore';
 import { usePhase } from '@/store/derived';
-import { AlertHero, Countdown, PlainSummary, TaskRow, WindowTimeline } from '@/ui/alert-widgets';
-import { Body, Button, Card, LinkRow, Pill, SectionLabel, Small, Xs } from '@/ui/primitives';
+import { Countdown, PlainSummary, TaskRow, WindowTimeline } from '@/ui/alert-widgets';
+import type { IconName } from '@/ui/icons';
+import { Button, Callout, Cell, Group, SectionFooter, SectionHeader, Subhead } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
-import { colors } from '@/ui/theme';
+import { colors, tabular, type } from '@/ui/theme';
+
+/** "CUC station – Puerto Rico (Puerto Rico Road, in front of …)" → ["CUC station – Puerto Rico", "Puerto Rico Road, in front of …"] */
+const splitName = (n: string): [string, string | null] => {
+  const m = /^(.*?)\s*\((.*)\)\s*$/.exec(n);
+  return m ? [m[1], m[2]] : [n, null];
+};
+const pretty = (s: string) => s.replace(/, MP/g, '').replace(/;\s*/g, ', ');
+const DEMO_NOTE = 'Demo data · real NWS Tiyan GU text from April 2026, times shifted to now';
 
 export default function AlertScreen() {
   const phase = usePhase();
@@ -31,57 +43,61 @@ export default function AlertScreen() {
   const router = useRouter();
   const [preview, setPreview] = useState<PrepWindow | null>(null);
 
+  // Deep-link scenario switch for demos and testing: nmityphoonwatch://?demo=before|during|after|live
+  const { demo } = useLocalSearchParams<{ demo?: string }>();
+  useEffect(() => {
+    if (demo === 'before' || demo === 'during' || demo === 'after' || demo === 'live' || demo === 'calm') applyDemoScenario(demo);
+  }, [demo]);
+
   const primary = phase.primary;
   const isDemo = !!primary?.isDemo;
+  const note = isDemo ? DEMO_NOTE : undefined;
   const stormName = primary ? extractStormName(primary) : null;
   const category = primary ? extractCategory(primary) : null;
   const sheltersMeta = cacheMeta.shelters;
-  const offlineDataReady = shelterSource === 'network' || true; // bundled copy always exists
   const offlineDataSub =
     shelterSource === 'network' && sheltersMeta?.fetchedAt
-      ? `Shelters saved · ${relativeAgo(sheltersMeta.fetchedAt)}${isStale(sheltersMeta.fetchedAt) ? ' · older than 7 days' : ''}`
-      : 'Map & shelter list bundled with the app · always available offline';
+      ? `Shelters saved ${relativeAgo(sheltersMeta.fetchedAt)}${isStale(sheltersMeta.fetchedAt) ? ' · older than 7 days' : ''}`
+      : 'Map, shelters and guidance are on this phone';
+  const issued = primary ? (offline ? `Received ${formatChstStamp(primary.receivedAt)} · no new data since` : `Issued ${formatChstStamp(primary.sent)} · ${primary.senderName}`) : '';
 
-  const pastNotices = (
-    <LinkRow title="Past notices" subtitle={`${alerts.length} saved on this phone · readable offline`} onPress={() => router.push('/history')} />
-  );
-
-  const offlineData = (
-    <LinkRow
-      title="Offline data"
-      subtitle={offlineDataSub}
-      onPress={() => router.push('/downloads')}
-      tone={offlineDataReady ? 'green' : 'red'}
-      right={<Pill tone={offlineDataReady ? 'green' : 'red'}>{offlineDataReady ? 'Ready' : 'Action'}</Pill>}
-    />
+  const moreGroup = (
+    <>
+      <SectionHeader>More</SectionHeader>
+      <Group>
+        <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone · readable offline`} accessory="chevron" onPress={() => router.push('/history')} />
+        <Cell icon="download" iconColor={colors.green} title="Offline data" subtitle={offlineDataSub} value="Ready" valueColor={colors.green} accessory="chevron" onPress={() => router.push('/downloads')} last />
+      </Group>
+    </>
   );
 
   // ---------- DURING ----------
   if (phase.phase === 'during' && primary) {
     return (
-      <Screen padded={false} header={<AlertHero kicker={`${(stormName ?? primary.event).toUpperCase()} · SAIPAN${isDemo ? ' · DEMO DATA' : ''}`} title="STAY INSIDE" sub="Damaging winds are happening now" />}>
-        <View style={styles.pad}>
-          <Card>
-            <SectionLabel>Right now</SectionLabel>
-            {DURING_TASKS.map((t) => (
-              <TaskRow key={t.id} task={t} checked={!!taskChecks[t.id]} onChange={(v) => actions.toggleTask(t.id, v)} />
-            ))}
-          </Card>
-          <Card tone="red">
-            <SectionLabel color={colors.red}>If the wind suddenly stops</SectionLabel>
-            <Body strong>Do not go outside.</Body>
-            <Small style={{ marginTop: 4 }}>You may be in the eye. Wind will return from the opposite direction, often within 20–40 minutes, and it will be just as strong.</Small>
-          </Card>
-          <LinkRow title="What do I do if…" subtitle="6 situations · works with no signal" onPress={() => router.push('/faq')} />
-          <EmergencyNumbers />
-          <Card>
-            <SectionLabel>Preparation checklist</SectionLabel>
-            <Xs style={{ marginBottom: 9 }}>Shopping and travel items are hidden during the storm. What you already have is still listed for reference.</Xs>
-            <Button title="View what I already have →" variant="ghost" onPress={() => router.push('/checklist')} />
-          </Card>
-          <OfficialLink alert={primary} />
-          {pastNotices}
-        </View>
+      <Screen key="during" largeTitle="Stay inside" subtitle="Damaging winds are happening now. Do not go outside for any reason." note={note}>
+        <Group style={{ marginTop: 8 }}>
+          <AlertRow alert={primary} icon="alert" color={colors.red} title={`${primary.event}${stormName ? ` · ${stormName}` : ''}`} subtitle={`${pretty(primary.areaDesc)} · Issued ${formatChstShort(primary.sent)}`} last />
+        </Group>
+        <SectionHeader>Right now</SectionHeader>
+        <Group>
+          {DURING_TASKS.map((t, i) => (
+            <TaskRow key={t.id} task={t} checked={!!taskChecks[t.id]} onChange={(v) => actions.toggleTask(t.id, v)} last={i === DURING_TASKS.length - 1} />
+          ))}
+        </Group>
+        <Callout icon="eye" tone="red" title="If the wind suddenly stops">
+          <Text style={type.headline}>Do not go outside.</Text>
+          <Subhead style={{ marginTop: 2 }}>You may be in the eye. Wind will return from the opposite direction, often within 20–40 minutes, and it will be just as strong.</Subhead>
+        </Callout>
+        <SectionHeader>Help</SectionHeader>
+        <Group>
+          <Cell icon="faq" title="What do I do if…" subtitle="6 situations · works with no signal" accessory="chevron" onPress={() => router.push('/faq')} />
+          <Cell icon="checklist" title="What I already have" subtitle="Shopping and travel items are hidden during the storm" accessory="chevron" onPress={() => router.push('/checklist')} last />
+        </Group>
+        <EmergencyNumbers />
+        <SectionHeader>More</SectionHeader>
+        <Group>
+          <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone`} accessory="chevron" onPress={() => router.push('/history')} last />
+        </Group>
       </Screen>
     );
   }
@@ -89,25 +105,28 @@ export default function AlertScreen() {
   // ---------- AFTER ----------
   if (phase.phase === 'after' && primary) {
     return (
-      <Screen padded={false} header={<AlertHero tone="navy" kicker={`ALL CLEAR DECLARED · ${phase.endedAt ? formatChstStamp(phase.endedAt) : ''}${isDemo ? ' · DEMO DATA' : ''}`} title="The storm has passed" sub="Hazards remain. Most injuries happen now." />}>
-        <View style={styles.pad}>
-          <Card>
-            <SectionLabel>Before you go outside</SectionLabel>
-            {AFTER_TASKS.map((t) => (
-              <TaskRow key={t.id} task={t} checked={!!taskChecks[t.id]} onChange={(v) => actions.toggleTask(t.id, v)} />
-            ))}
-          </Card>
-          <WaterPoints />
-          <Card tone="dashed">
-            <SectionLabel>Report damage · Request help · Find volunteers</SectionLabel>
-            <Small>These need a network connection, so they are not part of this app.</Small>
-            <Xs style={{ marginTop: 6 }}>After Sinlaku, 52 of Saipan&apos;s 74 cell sites were down. Features that need a network are not placed at the moment there is none. Instead: HSEM contacts and what FEMA will ask for, all offline.</Xs>
-            <Button title="What FEMA will ask for →" variant="ghost" style={{ marginTop: 11 }} onPress={() => router.push('/faq?section=after')} />
-          </Card>
-          <EmergencyNumbers />
-          <OfficialLink alert={primary} />
-          {pastNotices}
-        </View>
+      <Screen key="after" largeTitle="The storm has passed" subtitle="Hazards remain. Most injuries happen now — from wires, water and cleanup." note={note}>
+        <Group style={{ marginTop: 8 }}>
+          <AlertRow alert={primary} icon="checkCircle" color={colors.green} title={`All clear${phase.endedAt ? ` · ${formatChstStamp(phase.endedAt)}` : ''}`} subtitle={`${primary.event} cancelled · ${pretty(primary.areaDesc)}`} last />
+        </Group>
+        <SectionHeader>Before you go outside</SectionHeader>
+        <Group>
+          {AFTER_TASKS.map((t, i) => (
+            <TaskRow key={t.id} task={t} checked={!!taskChecks[t.id]} onChange={(v) => actions.toggleTask(t.id, v)} last={i === AFTER_TASKS.length - 1} />
+          ))}
+        </Group>
+        <WaterPoints />
+        <SectionHeader>Report damage · Request help · Find volunteers</SectionHeader>
+        <Group padded>
+          <Text style={type.body}>These need a network connection, so they are not part of this app.</Text>
+          <Text style={[type.footnote, { marginTop: 6 }]}>After Sinlaku, 52 of Saipan&apos;s 74 cell sites were down. Features that need a network are not placed at the moment there is none. Instead: HSEM contacts and what FEMA will ask for, all offline.</Text>
+          <Button title="What FEMA will ask for" variant="secondary" style={{ marginTop: 12 }} onPress={() => router.push('/faq?section=after')} />
+        </Group>
+        <EmergencyNumbers />
+        <SectionHeader>More</SectionHeader>
+        <Group>
+          <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone`} accessory="chevron" onPress={() => router.push('/history')} last />
+        </Group>
       </Screen>
     );
   }
@@ -116,34 +135,31 @@ export default function AlertScreen() {
   if (phase.phase === 'before' && primary) {
     const current = preview ?? phase.window ?? '72h';
     const tasks = WINDOW_TASKS[current];
-    const kicker = `${category ? `${category} · ` : ''}${primary.event.toUpperCase()} · ${primary.areaDesc.replace(/, MP/g, '').toUpperCase()}${isDemo ? ' · DEMO DATA' : ''}`;
     return (
-      <Screen
-        padded={false}
-        header={<AlertHero kicker={kicker} title={stormName ?? primary.event} sub={offline ? `Received ${formatChstStamp(primary.receivedAt)} · no new data since` : `Issued ${formatChstStamp(primary.sent)} · ${primary.senderName}`} />}>
-        <View style={styles.pad}>
-          <Card>
-            {phase.target ? (
-              <Countdown target={phase.target} label={`until damaging winds · ${formatChst(phase.target)}${phase.targetSource === 'open-meteo' ? ' · estimated from forecast wind' : ''}`} />
-            ) : (
-              <Body strong>Timing not yet available — prepare now.</Body>
-            )}
-            <SectionLabel style={{ marginTop: 16, marginBottom: 0 }}>Preparation window</SectionLabel>
-            <WindowTimeline current={current} forced={preview} onSelect={(w) => setPreview(w === (phase.window ?? '72h') ? null : w)} />
-          </Card>
-          <Card>
-            <SectionLabel>Do these 3 today</SectionLabel>
-            {tasks.map((t) => (
-              <TaskRow key={t.id} task={t} checked={!!taskChecks[t.id]} onChange={(v) => actions.toggleTask(t.id, v)} />
-            ))}
-          </Card>
-          <Card>
-            <PlainSummary summary={primary.plainSummary ?? primary.headline} status={primary.plainSummary ? 'ok' : primary.summaryStatus} generatedAt={primary.summaryAt} isDemo={isDemo} />
-            <Button title="See the official alert text →" variant="ghost" style={{ marginTop: 11 }} onPress={() => router.push({ pathname: '/alert/[id]', params: { id: primary.alertId } })} />
-          </Card>
-          {pastNotices}
-          {offlineData}
-        </View>
+      <Screen key="before" largeTitle={stormName ?? primary.event} subtitle={issued} note={note}>
+        <Group style={{ marginTop: 8 }}>
+          <AlertRow alert={primary} icon="alert" color={colors.red} title={[primary.event, category].filter(Boolean).join(' · ')} subtitle={pretty(primary.areaDesc)} last />
+        </Group>
+
+        <Group padded>
+          {phase.target ? <Countdown target={phase.target} source={phase.targetSource} /> : <Text style={type.headline}>Timing not yet available — prepare now.</Text>}
+          <View style={styles.hr} />
+          <Text style={type.sectionHeader}>Preparation window</Text>
+          <WindowTimeline current={current} forced={preview} onSelect={(w) => setPreview(w === (phase.window ?? '72h') ? null : w)} />
+        </Group>
+
+        <SectionHeader>Do these 3 today</SectionHeader>
+        <Group>
+          {tasks.map((t, i) => (
+            <TaskRow key={t.id} task={t} checked={!!taskChecks[t.id]} onChange={(v) => actions.toggleTask(t.id, v)} last={i === tasks.length - 1} />
+          ))}
+        </Group>
+
+        <SectionHeader>In plain words</SectionHeader>
+        <Group padded>
+          <PlainSummary summary={primary.plainSummary ?? primary.headline} status={primary.plainSummary ? 'ok' : primary.summaryStatus} generatedAt={primary.summaryAt} isDemo={isDemo} />
+        </Group>
+        {moreGroup}
       </Screen>
     );
   }
@@ -151,88 +167,94 @@ export default function AlertScreen() {
   // ---------- NONE (calm) ----------
   const latest = alerts[0];
   return (
-    <Screen padded={false} header={<AlertHero tone="navy" kicker="COMMONWEALTH OF THE NORTHERN MARIANA ISLANDS · SAIPAN" title="No active typhoon alert" sub={cacheMeta.alerts?.fetchedAt ? `NWS checked ${relativeAgo(cacheMeta.alerts.fetchedAt)}` : offline ? 'No signal · showing saved data' : 'Not checked yet'} />}>
-      <View style={styles.pad}>
-        <Card tone="green">
-          <SectionLabel color={colors.green}>Calm weather is when you prepare</SectionLabel>
-          <Body strong>Everything below works with no signal once it is on this phone.</Body>
-          <Xs style={{ marginTop: 6 }}>During Sinlaku (April 2026) 70% of Saipan&apos;s cell sites went dark for lack of power. What you save now is what you will have then.</Xs>
-        </Card>
-        {offlineData}
-        <LinkRow title="Preparation checklist" subtitle="Quantities computed for your household" onPress={() => router.push('/checklist')} />
-        <LinkRow title="Nearest shelters" subtitle="Offline map and landmark directions" onPress={() => router.push('/shelter')} />
+    <Screen key="calm" largeTitle="Alert" status testID="alert-calm">
+      <Group style={{ marginTop: 8 }}>
+        <Cell icon="checkCircle" iconColor={colors.green} title="No active typhoon alert" subtitle="Saipan · Tinian · Rota" last />
+      </Group>
+      <SectionFooter>Calm weather is when you prepare. During Sinlaku (April 2026), 70% of Saipan&apos;s cell sites went dark for lack of power. What you save now is what you will have then.</SectionFooter>
+
+      <SectionHeader>Get ready</SectionHeader>
+      <Group>
+        <Cell icon="download" iconColor={colors.green} title="Offline data" subtitle={offlineDataSub} value="Ready" valueColor={colors.green} accessory="chevron" onPress={() => router.push('/downloads')} />
+        <Cell icon="checklist" title="Preparation checklist" subtitle="Quantities computed for your household" accessory="chevron" onPress={() => router.push('/checklist')} />
+        <Cell icon="shelter" title="Nearest shelters" subtitle="Offline map and landmark directions" accessory="chevron" onPress={() => router.push('/shelter')} last />
+      </Group>
+
+      <SectionHeader right={cacheMeta.alerts?.fetchedAt ? `Checked ${relativeAgo(cacheMeta.alerts.fetchedAt)}` : undefined}>Notices</SectionHeader>
+      <Group>
         {latest ? (
-          <Card>
-            <SectionLabel>Latest notice</SectionLabel>
-            <Text style={styles.latestTitle}>{latest.event}{latest.isDemo ? ' · demo' : ''}</Text>
-            <Small style={{ marginTop: 3 }}>{latest.plainSummary ?? latest.headline ?? latest.areaDesc}</Small>
-            <Xs style={{ marginTop: 5, fontFamily: undefined }}>{formatChstStamp(latest.sent)}</Xs>
-          </Card>
-        ) : null}
-        {pastNotices}
-        <Button title={refreshing ? 'Checking NWS…' : offline ? 'No signal — will check automatically' : 'Check NWS now'} variant="ghost" disabled={offline || refreshing} onPress={() => void refreshAll()} />
-        <Xs style={{ textAlign: 'center', marginTop: 10 }}>Alerts: NWS Tiyan GU (api.weather.gov). Wind forecast: Weather data by Open-Meteo.com.</Xs>
-      </View>
+          <Cell
+            icon="alertOutline"
+            iconColor={latest.severity === 'Extreme' ? colors.red : colors.ink2}
+            title={`${latest.event}${latest.isDemo ? ' · demo' : ''}`}
+            subtitle={
+              <View>
+                <Subhead style={{ marginTop: 2 }}>{latest.plainSummary ?? latest.headline ?? latest.areaDesc}</Subhead>
+                <Text style={[type.footnote, tabular, { marginTop: 4 }]}>{formatChstStamp(latest.sent)}</Text>
+              </View>
+            }
+            accessory="chevron"
+            onPress={() => router.push({ pathname: '/alert/[id]', params: { id: latest.alertId } })}
+          />
+        ) : (
+          <Cell icon="history" iconColor={colors.ink2} title="No notices yet" subtitle="When the phone is online the app checks NWS for CNMI alerts and keeps every one here, readable offline." />
+        )}
+        <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone · readable offline`} accessory="chevron" onPress={() => router.push('/history')} last />
+      </Group>
+      <Button title={refreshing ? 'Checking NWS…' : offline ? 'No signal — will check automatically' : 'Check NWS now'} variant="secondary" disabled={offline || refreshing} onPress={() => void refreshAll()} style={{ marginTop: 6 }} />
+      <SectionFooter style={{ textAlign: 'center' }}>Alerts: NWS Tiyan GU (api.weather.gov) · Wind: Weather data by Open-Meteo.com</SectionFooter>
     </Screen>
   );
 }
 
-function OfficialLink({ alert }: { alert: StoredAlert }) {
+/** The one alert row at the top of an active phase: coloured icon, event, areas, chevron to the official text. */
+function AlertRow({ alert, icon, color, title, subtitle, last }: { alert: StoredAlert; icon: IconName; color: string; title: string; subtitle: string; last?: boolean }) {
   const router = useRouter();
-  return <LinkRow title="Official alert text" subtitle={`${alert.event} · ${formatChstStamp(alert.sent)}`} onPress={() => router.push({ pathname: '/alert/[id]', params: { id: alert.alertId } })} />;
+  return <Cell icon={icon} iconColor={color} title={title} subtitle={subtitle} accessory="chevron" onPress={() => router.push({ pathname: '/alert/[id]', params: { id: alert.alertId } })} accessibilityLabel={`${title}. ${subtitle}. Official alert text`} last={last} />;
+}
+
+async function dial(e164: string) {
+  try {
+    await Linking.openURL(`tel:${e164}`);
+  } catch {
+    /* no dialler */
+  }
 }
 
 export function EmergencyNumbers() {
   return (
-    <Card tone="navy">
-      <SectionLabel color={colors.navyMuted}>Emergency numbers</SectionLabel>
-      {CONTACTS.map((c) => (
-        <View key={c.id} style={{ marginBottom: 8 }}>
-          <Text style={styles.numBig}>{c.display}</Text>
-          <Xs style={{ color: colors.navyMuted }}>
-            {c.label} · {c.note}
-          </Xs>
-        </View>
-      ))}
-      <Xs style={{ color: '#7FA5D0', marginTop: 2 }}>Text first — texts often get through when calls and data do not. These numbers are stored in the app.</Xs>
-    </Card>
+    <>
+      <SectionHeader>Emergency numbers</SectionHeader>
+      <Group>
+        {CONTACTS.map((c, i) => (
+          <Cell key={c.id} icon="phone" title={c.label} subtitle={c.note} value={c.display} valueColor={colors.tint} onPress={() => void dial(c.e164)} accessibilityRole="link" accessibilityLabel={`Call ${c.label} ${c.display}`} last={i === CONTACTS.length - 1} />
+        ))}
+      </Group>
+      <SectionFooter>Text first — texts often get through when calls and data do not. These numbers are stored in the app.</SectionFooter>
+    </>
   );
 }
 
 function WaterPoints() {
   const { points: wp, lastVerified } = waterPointRepo.get();
   return (
-    <Card>
-      <SectionLabel>Water & supply points</SectionLabel>
-      {wp.length === 0 ? (
-        <Small>No water distribution points have been published for this storm yet. When signal returns, the list is refreshed; until then use stored or boiled water.</Small>
-      ) : (
-        wp.map((p) => (
-          <View key={p.id} style={styles.wp}>
-            <View style={styles.wpIcon}>
-              <Text style={styles.wpIconText}>W</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.wpName}>{p.name}</Text>
-              <Xs>{p.village} · {p.hours}</Xs>
-              {p.note ? <Xs>{p.note}</Xs> : null}
-            </View>
-          </View>
-        ))
-      )}
-      <Xs style={{ marginTop: 9 }}>
-        <Xs style={{ fontWeight: '800', color: colors.ink }}>Saved {lastVerified}.</Xs> Water points change often. This screen shows the last information received.
-      </Xs>
-    </Card>
+    <>
+      <SectionHeader right={`Saved ${lastVerified}`}>Water & supply points</SectionHeader>
+      <Group>
+        {wp.length === 0 ? (
+          <Cell icon="water" iconColor={colors.ink2} title="No water points published yet" subtitle="When signal returns the list is refreshed; until then use stored or boiled water." last />
+        ) : (
+          wp.map((p, i) => {
+            const [name, where] = splitName(p.name);
+            return <Cell key={p.id} icon="water" title={name} subtitle={[where, p.village, p.hours].filter(Boolean).join(' · ')} last={i === wp.length - 1} />;
+          })
+        )}
+      </Group>
+      <SectionFooter>Water points change often. This screen shows the last information received.</SectionFooter>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  pad: { paddingHorizontal: 16, paddingTop: 16 },
-  latestTitle: { fontSize: 15, fontWeight: '800', color: colors.ink },
-  numBig: { fontSize: 20, fontWeight: '800', color: colors.white, fontVariant: ['tabular-nums'] },
-  wp: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line2 },
-  wpIcon: { width: 38, height: 38, borderRadius: 10, backgroundColor: colors.navySoft, alignItems: 'center', justifyContent: 'center' },
-  wpIconText: { color: colors.navy, fontWeight: '800', fontSize: 15 },
-  wpName: { fontSize: 15, fontWeight: '700', color: colors.ink },
+  hr: { height: StyleSheet.hairlineWidth, backgroundColor: colors.line, marginVertical: 14 },
 });

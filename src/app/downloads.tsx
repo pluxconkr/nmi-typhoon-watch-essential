@@ -3,7 +3,7 @@
  * what is saved, how big, and when. Also hosts the demo/testing controls (clearly labelled).
  */
 import { useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Text } from 'react-native';
 
 import faq from '@/assets/data/faq.json';
 import saipan from '@/assets/data/saipan-coastline.json';
@@ -14,9 +14,10 @@ import { applyDemoScenario } from '@/services/demo';
 import { refreshAll, retrySummaries, type RefreshResult } from '@/services/refresh';
 import { actions, isOfflineNow, useAppState } from '@/store/appStore';
 import { useClock } from '@/store/derived';
-import { Button, Card, Pill, ProgressBar, SectionLabel, Segmented, Small, Toggle, Xs } from '@/ui/primitives';
+import type { IconName } from '@/ui/icons';
+import { Button, Cell, Group, ProgressRing, SectionFooter, SectionHeader, Segmented, Toggle } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
-import { colors, fonts } from '@/ui/theme';
+import { colors, tabular, type } from '@/ui/theme';
 
 const kb = (bytes: number) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
 
@@ -33,59 +34,39 @@ export default function DownloadsScreen() {
   const [last, setLast] = useState<RefreshResult | null>(null);
 
   const shelterBytes = shelterSource === 'network' ? shelterRepo.bytes() : JSON.stringify(shelters).length;
-  const alertBytes = JSON.stringify(alerts).length;
-  const forecastBytes = forecast ? JSON.stringify(forecast).length : 0;
-  const mapBytes = JSON.stringify(saipan).length;
-  const faqBytes = JSON.stringify(faq).length;
-
-  const rows = [
+  const rows: { key: string; icon: IconName; name: string; size: string; saved: boolean; when: string; stale: boolean }[] = [
     {
       key: 'shelters',
+      icon: 'shelter',
       name: 'Shelter list',
       size: kb(shelterBytes),
-      status: 'saved' as const,
-      when: shelterSource === 'network' && cacheMeta.shelters?.fetchedAt ? `saved · ${relativeAgo(cacheMeta.shelters.fetchedAt)}` : `bundled with the app · v${shelterRepo.bundledVersion()}`,
-      note: shelterSource === 'network' ? 'Downloaded from the configured HSEM feed. A bundled copy also ships with the app.' : 'Built-in copy. Refreshes from the HSEM feed when one is configured.',
+      saved: true,
+      when: shelterSource === 'network' && cacheMeta.shelters?.fetchedAt ? `saved ${relativeAgo(cacheMeta.shelters.fetchedAt)}` : `bundled · v${shelterRepo.bundledVersion()}`,
       stale: shelterSource === 'network' && cacheMeta.shelters?.fetchedAt ? isStale(cacheMeta.shelters.fetchedAt) : false,
     },
-    {
-      key: 'map',
-      name: 'Map · Saipan coastline (vector)',
-      size: kb(mapBytes),
-      status: 'saved' as const,
-      when: 'bundled',
-      note: 'Drawn from OpenStreetMap data inside the app. No tiles, no downloads, no signal needed.',
-      stale: false,
-    },
+    { key: 'map', icon: 'map', name: 'Map · Saipan coastline', size: kb(JSON.stringify(saipan).length), saved: true, when: 'bundled · OpenStreetMap vector', stale: false },
     {
       key: 'alerts',
+      icon: 'alertOutline',
       name: 'Alert history',
-      size: kb(alertBytes),
-      status: alerts.length > 0 ? ('saved' as const) : ('none' as const),
-      when: cacheMeta.alerts?.fetchedAt ? `NWS checked · ${relativeAgo(cacheMeta.alerts.fetchedAt)}` : 'not checked yet',
-      note: `${alerts.length} notices kept (last 50 or 90 days). Official text and summaries stored together.`,
+      size: kb(JSON.stringify(alerts).length),
+      saved: alerts.length > 0,
+      when: cacheMeta.alerts?.fetchedAt ? `${alerts.length} notices · NWS checked ${relativeAgo(cacheMeta.alerts.fetchedAt)}` : 'not checked yet',
       stale: false,
     },
     {
       key: 'forecast',
+      icon: 'wind',
       name: 'Wind forecast (7 days)',
-      size: forecast ? kb(forecastBytes) : '—',
-      status: forecast ? ('saved' as const) : ('none' as const),
-      when: cacheMeta.forecast?.fetchedAt ? `saved · ${relativeAgo(cacheMeta.forecast.fetchedAt)}` : 'not downloaded',
-      note: 'Weather data by Open-Meteo.com. Used only to estimate when damaging winds begin.',
+      size: forecast ? kb(JSON.stringify(forecast).length) : '—',
+      saved: !!forecast,
+      when: cacheMeta.forecast?.fetchedAt ? `saved ${relativeAgo(cacheMeta.forecast.fetchedAt)} · Open-Meteo` : 'not downloaded',
       stale: cacheMeta.forecast?.fetchedAt ? isStale(cacheMeta.forecast.fetchedAt, now, 1) : false,
     },
-    {
-      key: 'faq',
-      name: 'Offline guidance & FAQ',
-      size: kb(faqBytes),
-      status: 'saved' as const,
-      when: 'bundled',
-      note: 'Ships inside the app, always present.',
-      stale: false,
-    },
+    { key: 'faq', icon: 'faq', name: 'Offline guidance & FAQ', size: kb(JSON.stringify(faq).length), saved: true, when: 'bundled', stale: false },
   ];
-  const savedCount = rows.filter((r) => r.status === 'saved').length;
+  const savedCount = rows.filter((r) => r.saved).length;
+  const allSaved = savedCount === rows.length;
 
   const run = async () => {
     const r = await refreshAll();
@@ -109,102 +90,72 @@ export default function DownloadsScreen() {
   };
 
   return (
-    <Screen title="Offline data">
-      <Pill tone="navy" style={{ marginBottom: 10 }}>
-        S-08
-      </Pill>
-      <Xs style={{ marginBottom: 12 }}>This screen turns &quot;the app works offline&quot; into something you can see: what is saved, how big it is, and when.</Xs>
-
-      <Card>
-        <View style={styles.head}>
-          <SectionLabel style={{ marginBottom: 0 }}>Saved on this phone</SectionLabel>
-          <Text style={[styles.count, { color: savedCount === rows.length ? colors.green : colors.amber }]}>
-            {savedCount} / {rows.length}
-          </Text>
-        </View>
-        <ProgressBar pct={(savedCount / rows.length) * 100} color={savedCount === rows.length ? colors.green : colors.amber} />
-      </Card>
-
-      {rows.map((r) => (
-        <Card key={r.key} tone={r.stale ? 'amber' : 'default'}>
-          <View style={styles.rowHead}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.rowName}>{r.name}</Text>
-              <Xs>
-                {r.size} · {r.when}
-              </Xs>
-              <Xs style={{ marginTop: 3 }}>{r.note}</Xs>
-              {r.stale ? <Xs style={{ marginTop: 3, color: colors.amber, fontWeight: '800' }}>Older than expected — refresh when you have signal.</Xs> : null}
-            </View>
-            <Pill tone={r.status === 'saved' ? 'green' : 'red'}>{r.status === 'saved' ? 'Saved' : 'Missing'}</Pill>
-          </View>
-        </Card>
-      ))}
-
-      <Button
-        title={refreshing ? 'Refreshing…' : offline ? 'No signal — will retry automatically' : 'Refresh everything now'}
-        disabled={offline || refreshing}
-        onPress={() => void run()}
-        accessibilityHint="Downloads the latest alerts, forecast and shelter list while you have signal"
-      />
-      {last ? (
-        <Xs style={{ marginTop: 8, textAlign: 'center' }}>
-          Alerts: {last.alerts} · Forecast: {last.forecast} · Shelters: {last.shelters === 'no-source' ? 'bundled (no feed configured)' : last.shelters}
-        </Xs>
-      ) : null}
-      {savedCount === rows.length ? (
-        <Card tone="green" style={{ marginTop: 11 }}>
-          <Small style={{ fontWeight: '800', color: colors.green }}>✓ Everything you need is on this phone</Small>
-          <Xs style={{ marginTop: 4 }}>Turn on airplane mode and open the app again to check.</Xs>
-        </Card>
-      ) : null}
-
-      <Card tone="muted" style={{ marginTop: 11 }}>
-        <SectionLabel>If storage runs out</SectionLabel>
-        <Xs>The forecast and alert history are dropped first. The shelter list, the map and the FAQ are kept to the end — the app is usable without a forecast, but not without shelter addresses. Total footprint is under 1 MB.</Xs>
-      </Card>
-
-      <Card>
-        <SectionLabel>Notifications</SectionLabel>
-        <Toggle label="Notify me about new NWS alerts" value={settings.notificationsEnabled} onChange={(v) => actions.patchSettings({ notificationsEnabled: v })} hint="Local notifications; sound only for Extreme or Severe" />
-      </Card>
-
-      <Card tone="amber">
-        <SectionLabel color={colors.amber}>Demo & testing</SectionLabel>
-        <Xs style={{ marginBottom: 8 }}>Scenarios use real NWS Tiyan GU text from Super Typhoon Sinlaku (April 2026) with times shifted to now. Demo notices are labelled everywhere they appear.</Xs>
-        <Segmented<DemoScenario>
-          label="Demo scenario"
-          options={[
-            { value: 'live', label: 'Live' },
-            { value: 'before', label: 'Before' },
-            { value: 'during', label: 'During' },
-            { value: 'after', label: 'After' },
-          ]}
-          value={settings.demoScenario}
-          onChange={(v) => applyDemoScenario(v)}
+    <Screen title="Offline data" largeTitle="Offline data" subtitle="What is saved on this phone, how big, and when">
+      <Group style={{ marginTop: 8 }}>
+        <Cell
+          leading={
+            <ProgressRing pct={(savedCount / rows.length) * 100} size={44} stroke={4} color={allSaved ? colors.green : colors.amber}>
+              <Text style={[styles.ringText, tabular, { color: allSaved ? colors.green : colors.amber }]}>
+                {savedCount}/{rows.length}
+              </Text>
+            </ProgressRing>
+          }
+          title={allSaved ? 'Everything you need is on this phone' : `${rows.length - savedCount} item${rows.length - savedCount > 1 ? 's' : ''} not saved yet`}
+          subtitle={allSaved ? 'Turn on airplane mode and open the app again to check.' : 'Refresh while you have signal.'}
+          last
         />
-        <View style={{ marginTop: 6 }}>
-          <Toggle label="Simulate no signal" value={settings.simulateOffline} onChange={(v) => actions.patchSettings({ simulateOffline: v })} hint="Shows the OFFLINE banner and blocks network calls in the app" />
-        </View>
-        <Xs style={{ marginTop: 6 }}>For the real test, use airplane mode: quit the app, turn airplane mode on, relaunch. Every tab must still open.</Xs>
-      </Card>
+      </Group>
+      <Button title={refreshing ? 'Refreshing…' : offline ? 'No signal — will retry automatically' : 'Refresh everything now'} disabled={offline || refreshing} onPress={() => void run()} accessibilityHint="Downloads the latest alerts, forecast and shelter list while you have signal" />
+      {last ? <SectionFooter style={{ textAlign: 'center' }}>{`Alerts: ${last.alerts} · Forecast: ${last.forecast} · Shelters: ${last.shelters === 'no-source' ? 'bundled (no feed configured)' : last.shelters}`}</SectionFooter> : null}
 
-      <Card tone="muted">
-        <SectionLabel>About the data</SectionLabel>
-        <Xs>Alerts: National Weather Service, api.weather.gov (public domain). Wind forecast: Weather data by Open-Meteo.com (CC BY 4.0). Map: © OpenStreetMap contributors, ODbL 1.0 — openstreetmap.org/copyright. Village points: OpenStreetMap; Chalan Laulau and Fina Sisu from GeoNames.org (CC BY 4.0). Shelters: CNMI HSEM / Joint Information Center announcements. Guidance: FEMA, CDC, American Red Cross, NWS.</Xs>
-        <Text style={styles.stamp}>Last app data check: {cacheMeta.alerts?.fetchedAt ? formatChstStamp(cacheMeta.alerts.fetchedAt) : 'never'}</Text>
-      </Card>
+      <SectionHeader>Saved items</SectionHeader>
+      <Group>
+        {rows.map((r, i) => (
+          <Cell key={r.key} icon={r.icon} iconColor={r.saved ? (r.stale ? colors.amber : colors.green) : colors.red} title={r.name} subtitle={`${r.size} · ${r.when}${r.stale ? ' · older than expected' : ''}`} value={r.saved ? (r.stale ? 'Old' : 'Saved') : 'Missing'} valueColor={r.saved ? (r.stale ? colors.amber : colors.green) : colors.red} last={i === rows.length - 1} />
+        ))}
+      </Group>
+      <SectionFooter>If storage runs out, the forecast and alert history are dropped first. The shelter list, map and FAQ are kept to the end. Total footprint is under 1 MB.</SectionFooter>
 
-      <Button title="Reset app data" variant="ghost" onPress={confirmReset} />
-      <View style={{ height: 12 }} />
+      <SectionHeader>Notifications</SectionHeader>
+      <Group>
+        <Toggle icon="bell" label="Notify me about new NWS alerts" value={settings.notificationsEnabled} onChange={(v) => actions.patchSettings({ notificationsEnabled: v })} hint="Local notifications; sound only for Extreme or Severe" last />
+      </Group>
+
+      <SectionHeader>Demo & testing</SectionHeader>
+      <Group>
+        <Cell
+          icon="flask"
+          title="Scenario"
+          subtitle="Real NWS Tiyan GU text from Super Typhoon Sinlaku (April 2026), times shifted to now"
+          trailing={
+            <Segmented<DemoScenario>
+              label="Demo scenario"
+              options={[
+                { value: 'live', label: 'Live' },
+                { value: 'before', label: 'Before' },
+                { value: 'during', label: 'During' },
+                { value: 'after', label: 'After' },
+              ]}
+              value={settings.demoScenario}
+              onChange={(v) => applyDemoScenario(v)}
+            />
+          }
+        />
+        <Toggle icon="offline" label="Simulate no signal" value={settings.simulateOffline} onChange={(v) => actions.patchSettings({ simulateOffline: v })} hint="Shows the OFFLINE banner and blocks network calls" last />
+      </Group>
+      <SectionFooter>Demo notices are labelled everywhere they appear. For the real test use airplane mode: quit the app, turn airplane mode on, relaunch. Every tab must still open.</SectionFooter>
+
+      <SectionHeader>About the data</SectionHeader>
+      <Group padded>
+        <Text style={type.footnote}>Alerts: National Weather Service, api.weather.gov (public domain). Wind forecast: Weather data by Open-Meteo.com (CC BY 4.0). Map: © OpenStreetMap contributors, ODbL 1.0 — openstreetmap.org/copyright. Village points: OpenStreetMap; Chalan Laulau and Fina Sisu from GeoNames.org (CC BY 4.0). Shelters: CNMI HSEM / Joint Information Center announcements. Guidance: FEMA, CDC, American Red Cross, NWS.</Text>
+        <Text style={[type.footnote, tabular, { marginTop: 8 }]}>Last NWS check: {cacheMeta.alerts?.fetchedAt ? formatChstStamp(cacheMeta.alerts.fetchedAt) : 'never'}</Text>
+      </Group>
+
+      <Button title="Reset app data" variant="secondary" onPress={confirmReset} style={{ marginTop: 8 }} />
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 },
-  count: { fontFamily: fonts.mono, fontSize: 15, fontWeight: '800' },
-  rowHead: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  rowName: { fontSize: 15, fontWeight: '700', color: colors.ink },
-  stamp: { fontFamily: fonts.mono, fontSize: 11, color: colors.ink3, marginTop: 6 },
-});
+const styles = {
+  ringText: { fontSize: 11, fontWeight: '600' as const },
+};

@@ -1,15 +1,16 @@
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 
-import { Body, Button } from '@/ui/primitives';
+import { Button, Callout, Subhead } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 
 export default function NotFoundScreen() {
+  const router = useRouter();
   return (
     <Screen title="Not found">
-      <Body>That screen does not exist.</Body>
-      <Link href="/" asChild>
-        <Button title="Back to Alert tab" style={{ marginTop: 12 }} />
-      </Link>
+      <Callout icon="info" title="That screen does not exist">
+        <Subhead>Use the tabs to get back.</Subhead>
+      </Callout>
+      <Button title="Back to Alert tab" style={{ marginTop: 12 }} onPress={() => router.replace('/')} />
     </Screen>
   );
 }

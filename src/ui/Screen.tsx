@@ -1,29 +1,19 @@
 /**
- * Screen scaffold: OFFLINE banner (never hidden while offline), optional back header, scroll body.
+ * Screen scaffolds in the iOS idiom.
+ *  - OFFLINE banner: never hidden while offline (spec).
+ *  - Tab screens: large title with a one-line status under it.
+ *  - Sub screens: compact nav bar with back chevron; optional large title below.
  */
 import { useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { relativeAgo } from '@/domain/time';
 import { isOfflineNow, useAppState } from '@/store/appStore';
 
-import { MIN_TAP, colors, space } from './theme';
-
-export function OfflineBanner() {
-  const offline = useAppState((s) => isOfflineNow(s));
-  const source = useAppState((s) => s.shelterSource);
-  const simulated = useAppState((s) => s.settings.simulateOffline);
-  if (!offline) return null;
-  return (
-    <View style={styles.offline} accessibilityRole="alert" accessibilityLiveRegion="polite">
-      <Text style={styles.offlineText}>
-        OFFLINE MODE · {source === 'network' ? 'reading saved data' : 'using data bundled with the app'}
-        {simulated ? ' · simulated' : ''}
-      </Text>
-    </View>
-  );
-}
+import { Icon } from './icons';
+import { GUTTER, MIN_TAP, colors, type } from './theme';
 
 type Router = ReturnType<typeof useRouter>;
 
@@ -33,22 +23,43 @@ export function goBackOr(router: Router, fallback: '/' | '/checklist' | '/shelte
   else router.replace(fallback);
 }
 
-export function BackHeader({ title, right }: { title: string; right?: ReactNode }) {
+export function OfflineBanner() {
+  const offline = useAppState((s) => isOfflineNow(s));
+  const source = useAppState((s) => s.shelterSource);
+  const simulated = useAppState((s) => s.settings.simulateOffline);
+  if (!offline) return null;
+  return (
+    <View style={styles.offline} accessibilityRole="alert" accessibilityLiveRegion="polite">
+      <Icon name="offline" size={14} color={colors.offlineText} weight="semibold" />
+      <Text style={styles.offlineText}>
+        OFFLINE MODE · {source === 'network' ? 'reading saved data' : 'using data bundled with the app'}
+        {simulated ? ' · simulated' : ''}
+      </Text>
+    </View>
+  );
+}
+
+/** One-line status under a tab title: online/offline and last NWS check. */
+export function StatusLine() {
+  const offline = useAppState((s) => isOfflineNow(s));
+  const checked = useAppState((s) => s.cacheMeta.alerts?.fetchedAt ?? null);
+  const refreshing = useAppState((s) => s.refreshing);
+  const text = refreshing ? 'Checking NWS…' : offline ? 'No signal · showing saved data' : checked ? `NWS checked ${relativeAgo(checked)}` : 'NWS not checked yet';
+  return <Text style={styles.status}>{text}</Text>;
+}
+
+export function BackHeader({ title, right, fallback = '/' }: { title: string; right?: ReactNode; fallback?: '/' | '/checklist' | '/shelter' }) {
   const router = useRouter();
   return (
-    <View style={styles.backBar}>
-      <Pressable
-        onPress={() => goBackOr(router)}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={8}
-        style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.6 }]}>
-        <Text style={styles.backText}>‹ Back</Text>
+    <View style={styles.navBar}>
+      <Pressable onPress={() => goBackOr(router, fallback)} accessibilityRole="button" accessibilityLabel="Back" hitSlop={8} style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.5 }]}>
+        <Icon name="back" size={22} color={colors.tint} weight="semibold" />
+        <Text style={styles.backText}>Back</Text>
       </Pressable>
-      <Text style={styles.backTitle} numberOfLines={1}>
+      <Text style={styles.navTitle} numberOfLines={1}>
         {title}
       </Text>
-      <View style={{ marginLeft: 'auto' }}>{right}</View>
+      <View style={styles.navRight}>{right}</View>
     </View>
   );
 }
@@ -56,38 +67,66 @@ export function BackHeader({ title, right }: { title: string; right?: ReactNode 
 export function Screen({
   children,
   title,
+  largeTitle,
+  subtitle,
+  note,
+  status,
   header,
+  headerRight,
   contentStyle,
   padded = true,
   scroll = true,
   testID,
+  fallback,
 }: {
   children: ReactNode;
-  /** When set, renders a BackHeader with this title. */
+  /** Sub-screen nav bar title (renders a back button). */
   title?: string;
-  /** Custom header element rendered above the body (e.g. the red alert hero). */
+  /** Large page title (tab screens or sub-screens). */
+  largeTitle?: string;
+  subtitle?: string;
+  /** Footnote under the subtitle, e.g. the demo-data label. */
+  note?: string;
+  /** Show the NWS status line under the large title. */
+  status?: boolean;
+  /** Full-bleed element rendered above the body (e.g. the alert hero). */
   header?: ReactNode;
+  headerRight?: ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
   padded?: boolean;
   scroll?: boolean;
   testID?: string;
+  fallback?: '/' | '/checklist' | '/shelter';
 }) {
   const insets = useSafeAreaInsets();
-  const body = (
-    <View style={[padded && styles.padded, contentStyle]}>{children}</View>
-  );
+  const pageHeader = largeTitle ? (
+    <View style={[styles.pageHeader, !title && { paddingTop: 8 }]}>
+      <View style={{ flex: 1 }}>
+        <Text style={type.largeTitle} accessibilityRole="header">
+          {largeTitle}
+        </Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        {note ? <Text style={styles.status}>{note}</Text> : null}
+        {status ? <StatusLine /> : null}
+      </View>
+      {headerRight ? <View style={{ paddingBottom: 6 }}>{headerRight}</View> : null}
+    </View>
+  ) : null;
+  const body = <View style={[padded && styles.padded, contentStyle]}>{children}</View>;
   return (
     <View style={[styles.root, { paddingTop: insets.top }]} testID={testID}>
       <OfflineBanner />
-      {title ? <BackHeader title={title} /> : null}
+      {title ? <BackHeader title={largeTitle === title ? '' : title} fallback={fallback} /> : null}
       {scroll ? (
-        <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: insets.bottom + 24 }} keyboardShouldPersistTaps="handled">
+        <ScrollView style={styles.scroll} contentContainerStyle={{ paddingBottom: insets.bottom + 32 }} keyboardShouldPersistTaps="handled" contentInsetAdjustmentBehavior="never">
           {header}
+          {pageHeader}
           {body}
         </ScrollView>
       ) : (
         <View style={styles.scroll}>
           {header}
+          {pageHeader}
           {body}
         </View>
       )}
@@ -98,11 +137,15 @@ export function Screen({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  padded: { paddingHorizontal: space.lg, paddingTop: space.lg },
-  offline: { backgroundColor: colors.offlineBar, paddingVertical: 7, paddingHorizontal: 12, alignItems: 'center' },
-  offlineText: { color: colors.offlineText, fontSize: 12, fontWeight: '800', letterSpacing: 0.8 },
-  backBar: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.line2, minHeight: MIN_TAP },
-  backBtn: { paddingVertical: 8, paddingHorizontal: 4, minHeight: MIN_TAP, justifyContent: 'center' },
-  backText: { fontSize: 16, fontWeight: '800', color: colors.navy },
-  backTitle: { fontSize: 15, fontWeight: '700', color: colors.ink2, flexShrink: 1 },
+  padded: { paddingHorizontal: GUTTER },
+  offline: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.offlineBar, paddingVertical: 7, paddingHorizontal: 12 },
+  offlineText: { color: colors.offlineText, fontSize: 12, fontWeight: '600', letterSpacing: 0.2 },
+  pageHeader: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, paddingHorizontal: GUTTER, paddingTop: 2, paddingBottom: 8 },
+  subtitle: { ...type.subheadline, marginTop: 4 },
+  status: { ...type.footnote, marginTop: 3 },
+  navBar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, minHeight: MIN_TAP },
+  backBtn: { flexDirection: 'row', alignItems: 'center', minHeight: MIN_TAP, paddingRight: 8, minWidth: 84, gap: 2 },
+  backText: { fontSize: 17, color: colors.tint, letterSpacing: -0.41 },
+  navTitle: { flex: 1, textAlign: 'center', ...type.headline },
+  navRight: { minWidth: 84, alignItems: 'flex-end', paddingRight: 8 },
 });

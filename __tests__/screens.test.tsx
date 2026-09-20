@@ -68,7 +68,7 @@ describe('Alert tab in every phase (offline, no fetch)', () => {
     applyDemoScenario('before');
     await renderRouter(routes, { initialUrl: '/' });
     expect(await screen.findByText('Typhoon Sinlaku')).toBeTruthy();
-    expect(screen.getByText(/DEMO DATA/)).toBeTruthy();
+    expect(screen.getByText(/Demo data/)).toBeTruthy();
     expect(screen.getByText(/^\d+h \d{2}m \d{2}s$/)).toBeTruthy();
     expect(screen.getByText('Do these 3 today')).toBeTruthy();
     // 42h10m to onset → the 48h window (spec: >48h = 72h window, >24h = 48h window)
@@ -88,7 +88,7 @@ describe('Alert tab in every phase (offline, no fetch)', () => {
   test('during: STAY INSIDE, eye-of-storm card, emergency numbers', async () => {
     applyDemoScenario('during');
     await renderRouter(routes, { initialUrl: '/' });
-    expect(await screen.findByText('STAY INSIDE')).toBeTruthy();
+    expect(await screen.findByText('Stay inside')).toBeTruthy();
     expect(screen.getByText('If the wind suddenly stops')).toBeTruthy();
     expect(screen.getByText('(670) 237-8000')).toBeTruthy();
     expect(screen.queryByText('Do these 3 today')).toBeNull();
@@ -111,7 +111,7 @@ describe('Checklist tab', () => {
     expect(screen.getByText('60 L')).toBeTruthy();
     expect(screen.getByText('$200')).toBeTruthy();
     expect(screen.getByText('7 days')).toBeTruthy();
-    expect(screen.getByText('✓ Saved on this phone — works with no signal')).toBeTruthy();
+    expect(screen.getByText(/Saved on this phone — works with no signal/)).toBeTruthy();
     await press(screen.getByLabelText('Drinking water, 60 L, not yet done'));
     expect(getState().checklist.water.done).toBe(true);
     expect(getState().checklist.water.qtyAtCheck).toBe(60);
@@ -158,7 +158,7 @@ describe('Alert detail, history, FAQ, downloads, household, onboarding', () => {
   test('history lists saved notices', async () => {
     applyDemoScenario('after');
     await renderRouter(routes, { initialUrl: '/history' });
-    expect(await screen.findByText('Past notices')).toBeTruthy();
+    expect((await screen.findAllByText('Past notices')).length).toBeGreaterThan(0); // nav bar + large title
     expect(screen.getByText(/is cancelled; hazards remain/)).toBeTruthy();
     expect(screen.getAllByText(/Typhoon Warning/).length).toBeGreaterThanOrEqual(2);
   });
