@@ -5,7 +5,7 @@
 import type { NwsFeature, NwsFeatureCollection } from '@/domain/nws';
 
 export const NWS_ALERTS_URL = 'https://api.weather.gov/alerts/active?area=MP';
-export const NWS_USER_AGENT = 'NMITyphoonWatch/1.0 (nmi-typhoon-watch; contact: hsem-app@example.org)';
+export const NWS_USER_AGENT = 'NMITyphoonWatch/1.0 (nmi-typhoon-watch; contact: contact@pluxcon.com)';
 const TIMEOUT_MS = 10_000;
 
 interface NwsFeatureWithGeocode extends NwsFeature {

@@ -20,6 +20,8 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.ink2,
         tabBarStyle: styles.bar,
         tabBarLabelStyle: styles.label,
+        // Like UIKit tab bars: labels stay put at large text sizes; everything above the bar scales.
+        tabBarAllowFontScaling: false,
         lazy: false,
         sceneStyle: { backgroundColor: colors.bg },
       }}>

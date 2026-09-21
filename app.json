@@ -10,7 +10,7 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "supportsTablet": false,
-      "bundleIdentifier": "mp.gov.nmityphoonwatch",
+      "bundleIdentifier": "com.27363.nmityphoonwatch",
       "infoPlist": {
         "UIBackgroundModes": [
           "processing"
@@ -28,7 +28,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "mp.gov.nmityphoonwatch"
+      "package": "com.tstst.nmityphoonwatch"
     },
     "web": {
       "output": "server",

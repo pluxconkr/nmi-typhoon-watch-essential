@@ -31,7 +31,7 @@ export function OfflineBanner() {
   return (
     <View style={styles.offline} accessibilityRole="alert" accessibilityLiveRegion="polite">
       <Icon name="offline" size={14} color={colors.offlineText} weight="semibold" />
-      <Text style={styles.offlineText}>
+      <Text maxFontSizeMultiplier={1.4} style={styles.offlineText}>
         OFFLINE MODE · {source === 'network' ? 'reading saved data' : 'using data bundled with the app'}
         {simulated ? ' · simulated' : ''}
       </Text>
@@ -54,9 +54,9 @@ export function BackHeader({ title, right, fallback = '/' }: { title: string; ri
     <View style={styles.navBar}>
       <Pressable onPress={() => goBackOr(router, fallback)} accessibilityRole="button" accessibilityLabel="Back" hitSlop={8} style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.5 }]}>
         <Icon name="back" size={22} color={colors.tint} weight="semibold" />
-        <Text style={styles.backText}>Back</Text>
+        <Text maxFontSizeMultiplier={1.3} style={styles.backText}>Back</Text>
       </Pressable>
-      <Text style={styles.navTitle} numberOfLines={1}>
+      <Text maxFontSizeMultiplier={1.3} style={styles.navTitle} numberOfLines={1}>
         {title}
       </Text>
       <View style={styles.navRight}>{right}</View>
@@ -102,7 +102,7 @@ export function Screen({
   const pageHeader = largeTitle ? (
     <View style={[styles.pageHeader, !title && { paddingTop: 8 }]}>
       <View style={{ flex: 1 }}>
-        <Text style={type.largeTitle} accessibilityRole="header">
+        <Text maxFontSizeMultiplier={1.5} style={type.largeTitle} accessibilityRole="header">
           {largeTitle}
         </Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}

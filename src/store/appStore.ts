@@ -14,8 +14,10 @@ import {
   householdRepo,
   initStorage,
   locationRepo,
+  onStorageNotice,
   settingsRepo,
   shelterRepo,
+  storageNoticeRepo,
 } from '@/data/repos';
 import { RULES_VERSION } from '@/domain/rules';
 import { nowIso } from '@/domain/time';
@@ -26,6 +28,7 @@ import type {
   LocationFix,
   Settings,
   Shelter,
+  StorageNotice,
   StoredAlert,
   WindForecast,
 } from '@/domain/types';
@@ -54,6 +57,10 @@ export interface AppState {
   /** Epoch ms of the last completed refresh attempt (any result). */
   lastRefreshAt: number | null;
   refreshing: boolean;
+  /** Steps finished in the running refresh (Offline data screen shows this instead of a spinner). */
+  refreshProgress: { done: number; total: number } | null;
+  /** Set when the phone ran out of space and the app gave something up. Never silent. */
+  storageNotice: StorageNotice | null;
 }
 
 type Listener = () => void;
@@ -75,6 +82,8 @@ let state: AppState = {
   locationStatus: 'idle',
   lastRefreshAt: null,
   refreshing: false,
+  refreshProgress: null,
+  storageNotice: null,
 };
 
 const listeners = new Set<Listener>();
@@ -116,10 +125,16 @@ export function hydrate(): AppState {
     cacheMeta: cacheMetaRepo.getAll(),
     settings: settingsRepo.get(),
     location: locationRepo.get(),
+    storageNotice: storageNoticeRepo.get(),
   };
   emit();
   return state;
 }
+
+// An eviction changes what is on disk, so re-read the affected slices along with the notice.
+onStorageNotice((notice) => {
+  setState({ storageNotice: notice, forecast: forecastRepo.get(), alerts: alertRepo.getAll(), cacheMeta: cacheMetaRepo.getAll() });
+});
 
 // ---------- Selectors / hooks ----------
 
@@ -161,6 +176,7 @@ export const actions = {
     setState({ shelters, shelterSource: source });
   },
   setForecast(f: WindForecast | null) {
+    // If the write fails (disk full) the forecast still serves this session; it is simply gone after a restart.
     if (f) forecastRepo.set(f);
     setState({ forecast: f });
   },
@@ -178,7 +194,14 @@ export const actions = {
     setState({ location: fix ?? state.location, locationStatus: status });
   },
   setRefreshing(refreshing: boolean, lastRefreshAt?: number) {
-    setState({ refreshing, ...(lastRefreshAt !== undefined ? { lastRefreshAt } : {}) });
+    setState({ refreshing, ...(refreshing ? {} : { refreshProgress: null }), ...(lastRefreshAt !== undefined ? { lastRefreshAt } : {}) });
+  },
+  setRefreshProgress(done: number, total: number) {
+    setState({ refreshProgress: { done, total } });
+  },
+  dismissStorageNotice() {
+    storageNoticeRepo.clear();
+    setState({ storageNotice: null });
   },
   rehydrate() {
     hydrate();

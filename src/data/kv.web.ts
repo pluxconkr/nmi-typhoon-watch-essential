@@ -23,14 +23,18 @@ export const kv = {
       return null;
     }
   },
-  set(key: string, value: unknown): void {
+  lastWriteOk: true,
+  set(key: string, value: unknown): boolean {
     const raw = JSON.stringify(value);
     mem.set(key, raw);
     try {
       ls()?.setItem(PREFIX + key, raw);
+      this.lastWriteOk = true;
     } catch {
-      /* quota / private mode */
+      /* quota / private mode — the in-memory copy still serves this session */
+      this.lastWriteOk = false;
     }
+    return this.lastWriteOk;
   },
   update<T>(key: string, fn: (prev: T | null) => T): T {
     const next = fn(this.get<T>(key));

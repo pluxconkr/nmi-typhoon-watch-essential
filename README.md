@@ -56,6 +56,53 @@ Manual offline acceptance procedures (T1–T9 from the handoff spec) are in [doc
 
 To compare summary models before picking `SUMMARY_MODEL`: `OPENROUTER_API_KEY=… python3 scripts/bench-summary.py openai/gpt-5.6-luna meta-llama/llama-4-scout` (latency, word count, cost and validation on the four real Sinlaku alerts).
 
+## Build, deploy, release
+
+Identifiers: iOS `com.27363.nmityphoonwatch`, Android `com.tstst.nmityphoonwatch` (see `app.json`). Profiles live in `eas.json`. Commands below use EAS CLI 16 or newer (`npm i -g eas-cli`).
+
+**1. Link the project (once)**
+
+```sh
+eas login
+eas init            # writes extra.eas.projectId into app.json
+```
+
+**2. Deploy the summary route** (the only server code: `src/app/api/summarize+api.ts`). EAS Hosting reads server variables from the EAS environment, not from `.env.local`, and cannot use `secret` visibility, so the key is stored as `sensitive`.
+
+```sh
+eas env:set --name OPENROUTER_API_KEY --value <key> --environment production --visibility sensitive
+eas env:set --name SUMMARY_MODEL --value meta-llama/llama-4-scout --environment production --visibility plaintext
+eas env:set --name SUMMARY_FALLBACK_MODELS --value google/gemini-3.8-flash,openai/gpt-5.6-terra --environment production --visibility plaintext
+
+npx expo export --platform web
+eas deploy --prod --environment production      # prints https://<name>.expo.app
+```
+
+Check it: `curl https://<name>.expo.app/api/summarize` should answer `{"configured":true,...}`.
+
+**3. Point the app at it.** `EXPO_PUBLIC_*` values are inlined into the app at build time.
+
+```sh
+eas env:set --name EXPO_PUBLIC_SUMMARY_URL --value https://<name>.expo.app/api/summarize --environment production --visibility plaintext
+# optional HSEM shelter feed (JSON shaped like assets/data/shelters.json)
+eas env:set --name EXPO_PUBLIC_SHELTERS_URL --value https://<host>/cnmi-shelters.json --environment production --visibility plaintext
+```
+
+Repeat step 3 with `--environment preview` and `--environment development` for those profiles.
+
+**4. Builds**
+
+```sh
+eas build --profile development --platform ios            # dev build for a real iPhone (background task, notifications, T1–T9)
+eas build --profile development-simulator --platform ios  # same, for the iOS Simulator
+eas build --profile preview --platform android            # installable APK
+eas build --profile production --platform all             # store builds, version auto-incremented
+eas submit --profile production --platform ios            # TestFlight / App Store
+eas submit --profile production --platform android        # Play Console
+```
+
+Once `expo-dev-client` is installed, `npx expo start` opens development builds by default. Use `npx expo start --go` to keep using Expo Go.
+
 ## Demo scenarios
 
 Offline data → **Demo & testing** → Before / During / After. These load the real NWS Tiyan GU text for Super Typhoon Sinlaku (12–17 April 2026, recovered from the IEM VTEC archive) with timestamps shifted to "now", so the countdown, window logic and phase screens can be shown at any time. Demo notices are labelled everywhere they appear. "Simulate no signal" shows the OFFLINE banner and blocks all network calls inside the app; the real test is airplane mode.

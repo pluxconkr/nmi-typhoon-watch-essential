@@ -13,11 +13,13 @@ import type {
   CacheMetaMap,
   ChecklistState,
   ChecklistStateMap,
+  DroppedItem,
   FaqEntry,
   Household,
   LocationFix,
   Settings,
   Shelter,
+  StorageNotice,
   StoredAlert,
   WaterPoint,
   WindForecast,
@@ -37,6 +39,7 @@ export const KEYS = {
   forecast: 'forecast:v1',
   lastFix: 'location:lastFix:v1',
   notifiedIds: 'notified:v1',
+  storageNotice: 'storageNotice:v1',
 } as const;
 
 export const SCHEMA_VERSION = 1;
@@ -47,6 +50,88 @@ export function initStorage(): void {
   if (v !== SCHEMA_VERSION) kv.set(KEYS.schema, SCHEMA_VERSION);
 }
 
+// ---------- Storage guard (S-10 "low storage": drop by priority, say what was dropped) ----------
+
+/** Below this much free space the app stops keeping data it can download again. */
+export const LOW_SPACE_BYTES = 5 * 1024 * 1024;
+/** Notices kept when space runs out: the newest ones. Older ones can be re-read online. */
+export const LOW_SPACE_ALERT_KEEP = 10;
+
+type NoticeListener = (n: StorageNotice) => void;
+let noticeListener: NoticeListener | null = null;
+/** The store subscribes so the UI can say what was given up. */
+export function onStorageNotice(l: NoticeListener | null): void {
+  noticeListener = l;
+}
+
+export function isLowOnSpace(): boolean {
+  const free = files.availableBytes();
+  return Number.isFinite(free) && free < LOW_SPACE_BYTES;
+}
+
+/**
+ * Give up re-downloadable data, cheapest loss first: the wind forecast, then older notices.
+ * Household, checklist, shelters, map and FAQ are never dropped.
+ */
+export function dropLowPriority(): DroppedItem[] {
+  const dropped: DroppedItem[] = [];
+  if (kv.get<WindForecast>(KEYS.forecast) != null) {
+    kv.remove(KEYS.forecast);
+    kv.update<CacheMetaMap>(KEYS.cacheMeta, (prev) => {
+      const next = { ...(prev ?? {}) };
+      delete next.forecast;
+      return next;
+    });
+    dropped.push('forecast');
+  }
+  const alerts = kv.get<StoredAlert[]>(KEYS.alerts) ?? [];
+  if (alerts.length > LOW_SPACE_ALERT_KEEP) {
+    kv.set(KEYS.alerts, pruneAlerts(alerts).slice(0, LOW_SPACE_ALERT_KEEP));
+    dropped.push('alert-history');
+  }
+  return dropped;
+}
+
+/** Record and announce an eviction. Silent failure is the one thing this must never be. */
+export function reportStorageNotice(dropped: DroppedItem[], recovered: boolean): StorageNotice | null {
+  if (dropped.length === 0 && recovered) return null;
+  const free = files.availableBytes();
+  const notice: StorageNotice = { at: new Date().toISOString(), dropped, freeBytes: Number.isFinite(free) ? free : null, recovered };
+  kv.set(KEYS.storageNotice, notice);
+  noticeListener?.(notice);
+  return notice;
+}
+
+/** Write; if the disk is full, evict by priority and try once more (optionally with a smaller value). */
+function guardedSet<T>(key: string, value: T, shrink?: (v: T) => T): T {
+  if (kv.set(key, value)) return value;
+  const dropped = dropLowPriority();
+  const retry = shrink ? shrink(value) : value;
+  const ok = kv.set(key, retry);
+  reportStorageNotice(dropped, ok);
+  return retry;
+}
+
+function guardedUpdate<T>(key: string, fn: (prev: T | null) => T, shrink?: (v: T) => T): T {
+  const next = kv.update<T>(key, fn);
+  if (kv.lastWriteOk) return next;
+  const dropped = dropLowPriority();
+  const retried = kv.update<T>(key, (prev) => (shrink ? shrink(fn(prev)) : fn(prev)));
+  reportStorageNotice(dropped, kv.lastWriteOk);
+  return retried;
+}
+
+const keepNewest = (list: StoredAlert[]) => list.slice(0, LOW_SPACE_ALERT_KEEP);
+
+export const storageNoticeRepo = {
+  get(): StorageNotice | null {
+    return kv.get<StorageNotice>(KEYS.storageNotice);
+  },
+  clear(): void {
+    kv.remove(KEYS.storageNotice);
+  },
+};
+
 // ---------- Household / onboarding ----------
 
 export const householdRepo = {
@@ -55,14 +140,14 @@ export const householdRepo = {
   },
   set(h: Household): Household {
     const clean = sanitizeHousehold({ ...h, rulesVersion: RULES_VERSION });
-    kv.set(KEYS.household, clean);
+    guardedSet(KEYS.household, clean);
     return clean;
   },
   isOnboarded(): boolean {
     return kv.get<boolean>(KEYS.onboarded) === true;
   },
   setOnboarded(v: boolean): void {
-    kv.set(KEYS.onboarded, v);
+    guardedSet(KEYS.onboarded, v);
   },
 };
 
@@ -73,7 +158,7 @@ export const checklistRepo = {
     return kv.get<ChecklistStateMap>(KEYS.checklist) ?? {};
   },
   toggle(itemId: string, done: boolean, qty: number | null, unit: string, nowIso: string): ChecklistStateMap {
-    return kv.update<ChecklistStateMap>(KEYS.checklist, (prev) => ({
+    return guardedUpdate<ChecklistStateMap>(KEYS.checklist, (prev) => ({
       ...(prev ?? {}),
       [itemId]: { itemId, done, qtyAtCheck: done ? qty : null, unit, doneAt: nowIso, source: 'local' } satisfies ChecklistState,
     }));
@@ -83,7 +168,7 @@ export const checklistRepo = {
     return kv.get<Record<string, boolean>>(KEYS.taskChecks) ?? {};
   },
   toggleTask(taskId: string, done: boolean): Record<string, boolean> {
-    return kv.update<Record<string, boolean>>(KEYS.taskChecks, (prev) => ({ ...(prev ?? {}), [taskId]: done }));
+    return guardedUpdate<Record<string, boolean>>(KEYS.taskChecks, (prev) => ({ ...(prev ?? {}), [taskId]: done }));
   },
 };
 
@@ -94,20 +179,24 @@ export const alertRepo = {
     return kv.get<StoredAlert[]>(KEYS.alerts) ?? [];
   },
   replaceAll(alerts: StoredAlert[], now: number = Date.now()): StoredAlert[] {
-    const pruned = pruneAlerts(alerts, now);
-    kv.set(KEYS.alerts, pruned);
-    return pruned;
+    return guardedSet(KEYS.alerts, pruneAlerts(alerts, now), keepNewest);
   },
   upsert(alert: StoredAlert, now: number = Date.now()): StoredAlert[] {
-    return kv.update<StoredAlert[]>(KEYS.alerts, (prev) => {
-      const list = (prev ?? []).filter((a) => a.alertId !== alert.alertId);
-      list.push(alert);
-      return pruneAlerts(list, now);
-    });
+    return guardedUpdate<StoredAlert[]>(
+      KEYS.alerts,
+      (prev) => {
+        const list = (prev ?? []).filter((a) => a.alertId !== alert.alertId);
+        list.push(alert);
+        return pruneAlerts(list, now);
+      },
+      keepNewest,
+    );
   },
   setSummary(alertId: string, summary: string | null, status: StoredAlert['summaryStatus'], at: string): StoredAlert[] {
-    return kv.update<StoredAlert[]>(KEYS.alerts, (prev) =>
-      (prev ?? []).map((a) => (a.alertId === alertId ? { ...a, plainSummary: summary, summaryStatus: status, summaryAt: at } : a)),
+    return guardedUpdate<StoredAlert[]>(
+      KEYS.alerts,
+      (prev) => (prev ?? []).map((a) => (a.alertId === alertId ? { ...a, plainSummary: summary, summaryStatus: status, summaryAt: at } : a)),
+      keepNewest,
     );
   },
   getNotifiedIds(): string[] {
@@ -168,8 +257,11 @@ export const forecastRepo = {
   get(): WindForecast | null {
     return kv.get<WindForecast>(KEYS.forecast);
   },
-  set(f: WindForecast): void {
-    kv.set(KEYS.forecast, f);
+  /** The forecast is the first thing given up when space runs out, so a failed write is not retried. */
+  set(f: WindForecast): boolean {
+    if (kv.set(KEYS.forecast, f)) return true;
+    reportStorageNotice(['forecast'], true);
+    return false;
   },
 };
 
@@ -180,7 +272,7 @@ export const cacheMetaRepo = {
     return kv.get<CacheMetaMap>(KEYS.cacheMeta) ?? {};
   },
   set(meta: CacheMeta): CacheMetaMap {
-    return kv.update<CacheMetaMap>(KEYS.cacheMeta, (prev) => ({ ...(prev ?? {}), [meta.key]: meta }));
+    return guardedUpdate<CacheMetaMap>(KEYS.cacheMeta, (prev) => ({ ...(prev ?? {}), [meta.key]: meta }));
   },
   remove(key: AssetKey): CacheMetaMap {
     return kv.update<CacheMetaMap>(KEYS.cacheMeta, (prev) => {
@@ -200,7 +292,7 @@ export const settingsRepo = {
     return { ...DEFAULT_SETTINGS, ...(kv.get<Partial<Settings>>(KEYS.settings) ?? {}) };
   },
   patch(p: Partial<Settings>): Settings {
-    return kv.update<Settings>(KEYS.settings, (prev) => ({ ...DEFAULT_SETTINGS, ...(prev ?? {}), ...p }));
+    return guardedUpdate<Settings>(KEYS.settings, (prev) => ({ ...DEFAULT_SETTINGS, ...(prev ?? {}), ...p }));
   },
 };
 

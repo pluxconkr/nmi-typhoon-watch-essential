@@ -24,7 +24,7 @@ export function Countdown({ target, source }: { target: number; source?: 'nws-on
   return (
     <View accessibilityLiveRegion="polite">
       <Text style={type.subheadline}>Damaging winds expected in</Text>
-      <Text style={[styles.countdown, tabular, soon && { color: colors.red }]} accessibilityLabel={`${formatCountdown(remaining)} remaining`}>
+      <Text maxFontSizeMultiplier={1.15} adjustsFontSizeToFit numberOfLines={1} style={[styles.countdown, tabular, soon && { color: colors.red }]} accessibilityLabel={`${formatCountdown(remaining)} remaining`}>
         {formatCountdown(remaining)}
       </Text>
       <Text style={type.footnote}>
@@ -52,7 +52,7 @@ export function WindowTimeline({ current, onSelect, forced }: { current: PrepWin
               accessibilityLabel={`${w} window${now ? ', current' : done ? ', passed' : ''}`}
               style={styles.timelineItem}>
               <View style={[styles.bar, done && { backgroundColor: colors.tint }, now && { backgroundColor: colors.red }]} />
-              <Text style={[styles.barLabel, tabular, done && { color: colors.tint }, now && { color: colors.red, fontWeight: '600' }]}>{w}</Text>
+              <Text maxFontSizeMultiplier={1.3} style={[styles.barLabel, tabular, done && { color: colors.tint }, now && { color: colors.red, fontWeight: '600' }]}>{w}</Text>
             </Pressable>
           );
         })}

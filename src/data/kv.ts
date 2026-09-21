@@ -18,11 +18,17 @@ export const kv = {
       return null;
     }
   },
-  set(key: string, value: unknown): void {
+  /** false when the write did not reach disk (e.g. the phone is out of space). */
+  lastWriteOk: true,
+  set(key: string, value: unknown): boolean {
     try {
       store.setItemSync(key, JSON.stringify(value));
+      this.lastWriteOk = true;
+      return true;
     } catch (e) {
       if (__DEV__) console.warn('[kv] set failed', key, e);
+      this.lastWriteOk = false;
+      return false;
     }
   },
   /** Atomic read-modify-write inside one SQLite transaction. */
@@ -39,8 +45,10 @@ export const kv = {
         next = fn(parsed);
         return JSON.stringify(next);
       });
+      this.lastWriteOk = true;
     } catch (e) {
       if (__DEV__) console.warn('[kv] update failed', key, e);
+      this.lastWriteOk = false;
       next = fn(this.get<T>(key));
     }
     return next as T;

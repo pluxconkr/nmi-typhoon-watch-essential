@@ -2,7 +2,7 @@
  * Cache-first refresh orchestration. Never throws, never blocks rendering, never runs offline.
  * The UI is already drawn from local data before any of this starts.
  */
-import { alertRepo, cacheMetaRepo, shelterRepo } from '@/data/repos';
+import { alertRepo, cacheMetaRepo, dropLowPriority, isLowOnSpace, reportStorageNotice, shelterRepo } from '@/data/repos';
 import { mergeAlerts } from '@/domain/nws';
 import { nowIso } from '@/domain/time';
 import type { AssetKey, Shelter, StoredAlert } from '@/domain/types';
@@ -15,7 +15,8 @@ import { requestSummary } from './summaryClient';
 
 export interface RefreshResult {
   alerts: 'ok' | 'skipped' | 'failed';
-  forecast: 'ok' | 'skipped' | 'failed';
+  /** 'low-storage' = deliberately not kept because the phone is almost full. */
+  forecast: 'ok' | 'skipped' | 'failed' | 'low-storage';
   shelters: 'ok' | 'skipped' | 'failed' | 'no-source';
   newAlertIds: string[];
 }
@@ -70,6 +71,8 @@ export async function retrySummaries(): Promise<void> {
 
 export async function refreshForecast(): Promise<RefreshResult['forecast']> {
   if (isOfflineNow()) return 'skipped';
+  // The forecast is the first thing given up when space runs out, so it is not downloaded either.
+  if (isLowOnSpace()) return 'low-storage';
   try {
     const f = await fetchForecast();
     actions.setForecast(f);
@@ -107,7 +110,17 @@ export function refreshAll(): Promise<RefreshResult> {
   if (inFlight) return inFlight;
   actions.setRefreshing(true);
   inFlight = (async () => {
-    const [a, f, s] = await Promise.all([refreshAlerts(), refreshForecast(), refreshShelters()]);
+    // Almost full: give up re-downloadable data first and say so, instead of failing silently later.
+    if (isLowOnSpace()) reportStorageNotice(dropLowPriority(), true);
+    const total = SHELTERS_URL ? 3 : 2;
+    let done = 0;
+    actions.setRefreshProgress(0, total);
+    const tick = <T,>(r: T): T => {
+      done += 1;
+      actions.setRefreshProgress(Math.min(done, total), total);
+      return r;
+    };
+    const [a, f, s] = await Promise.all([refreshAlerts().then(tick), refreshForecast().then(tick), SHELTERS_URL ? refreshShelters().then(tick) : refreshShelters()]);
     actions.setRefreshing(false, Date.now());
     return { alerts: a.status, forecast: f, shelters: s, newAlertIds: a.newIds };
   })().finally(() => {

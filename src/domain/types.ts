@@ -161,6 +161,18 @@ export interface WindForecast {
 
 export type AssetKey = 'shelters' | 'forecast' | 'alerts' | 'faq' | 'map';
 
+/** What the app gave up when the phone ran out of space (S-10: never fail silently). */
+export type DroppedItem = 'forecast' | 'alert-history';
+export interface StorageNotice {
+  /** ISO timestamp of the eviction. */
+  at: string;
+  dropped: DroppedItem[];
+  /** Free bytes reported by the OS at that moment, or null if unknown. */
+  freeBytes: number | null;
+  /** false when even after eviction the write could not be saved. */
+  recovered: boolean;
+}
+
 /** Every cached blob carries a time stamp. A cache entry without one is a bug. */
 export interface CacheMeta {
   key: AssetKey;

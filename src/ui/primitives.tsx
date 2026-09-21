@@ -125,7 +125,7 @@ export function Cell({
       <View style={[styles.cellBody, !last && styles.cellSeparator]}>
         <View style={{ flex: 1 }}>
           {typeof title === 'string' ? (
-            <Text style={type.body} numberOfLines={2}>
+            <Text style={type.body}>
               {title}
             </Text>
           ) : (
@@ -133,7 +133,7 @@ export function Cell({
           )}
           {subtitle ? typeof subtitle === 'string' ? <Text style={[type.footnote, { marginTop: 2 }]}>{subtitle}</Text> : subtitle : null}
         </View>
-        {value ? <Text style={[styles.cellValue, tabular, valueColor ? { color: valueColor } : null]}>{value}</Text> : null}
+        {value ? <Text maxFontSizeMultiplier={1.4} style={[styles.cellValue, tabular, valueColor ? { color: valueColor } : null]}>{value}</Text> : null}
         {trailing}
         {accessory === 'chevron' ? <Icon name="chevron" size={14} color={colors.ink4} weight="semibold" style={{ marginLeft: 6 }} /> : null}
         {accessory === 'check' ? <Icon name="check" size={17} color={colors.tint} weight="semibold" style={{ marginLeft: 6 }} /> : null}
@@ -236,7 +236,7 @@ export function Button({
       testID={testID}
       style={({ pressed }) => [styles.button, size === 'sm' && styles.buttonSm, { backgroundColor: bg }, disabled && styles.disabled, pressed && !disabled && styles.pressed, style]}>
       {icon ? <Icon name={icon} size={18} color={fg} weight="semibold" /> : null}
-      <Text style={[styles.buttonText, size === 'sm' && { fontSize: 15 }, { color: fg }]}>{title}</Text>
+      <Text maxFontSizeMultiplier={1.5} style={[styles.buttonText, size === 'sm' && { fontSize: 15 }, { color: fg }]}>{title}</Text>
     </Pressable>
   );
 }
@@ -281,11 +281,11 @@ export function Stepper({ label, value, min, max, onChange, hint, icon, last }: 
       trailing={
         <View style={styles.stepper} accessibilityRole="adjustable" accessibilityLabel={label} accessibilityValue={{ now: value, min, max, text: String(value) }}>
           <Pressable onPress={dec} accessibilityLabel={`Decrease ${label}`} accessibilityRole="button" disabled={value <= min} style={({ pressed }) => [styles.stepBtn, value <= min && styles.disabled, pressed && styles.pressed]}>
-            <Text style={styles.stepBtnText}>−</Text>
+            <Text maxFontSizeMultiplier={1.3} style={styles.stepBtnText}>−</Text>
           </Pressable>
-          <Text style={[styles.stepValue, tabular]}>{value}</Text>
+          <Text maxFontSizeMultiplier={1.3} style={[styles.stepValue, tabular]}>{value}</Text>
           <Pressable onPress={inc} accessibilityLabel={`Increase ${label}`} accessibilityRole="button" disabled={value >= max} style={({ pressed }) => [styles.stepBtn, value >= max && styles.disabled, pressed && styles.pressed]}>
-            <Text style={styles.stepBtnText}>+</Text>
+            <Text maxFontSizeMultiplier={1.3} style={styles.stepBtnText}>+</Text>
           </Pressable>
         </View>
       }
@@ -324,7 +324,7 @@ export function Segmented<T extends string | number>({ options, value, onChange,
         const on = o.value === value;
         return (
           <Pressable key={String(o.value)} onPress={() => onChange(o.value)} accessibilityRole="radio" accessibilityState={{ selected: on, checked: on }} style={[styles.segment, on && styles.segmentOn]}>
-            <Text style={[styles.segmentText, on && styles.segmentTextOn]}>{o.label}</Text>
+            <Text maxFontSizeMultiplier={1.3} numberOfLines={2} style={[styles.segmentText, on && styles.segmentTextOn]}>{o.label}</Text>
           </Pressable>
         );
       })}
@@ -378,11 +378,11 @@ const styles = StyleSheet.create({
   toggleKnob: { width: 27, height: 27, borderRadius: 14, backgroundColor: colors.white },
   toggleKnobOn: { alignSelf: 'flex-end' },
   segmented: { flexDirection: 'row', backgroundColor: colors.fill, borderRadius: 9, padding: 2 },
-  segment: { flex: 1, minHeight: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 7 },
+  segment: { flex: 1, minHeight: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 7, paddingVertical: 5, paddingHorizontal: 4 },
   segmentOn: { backgroundColor: colors.surface },
-  segmentText: { fontSize: 15, fontWeight: '500', color: colors.ink },
+  segmentText: { fontSize: 15, fontWeight: '500', color: colors.ink, textAlign: 'center' },
   segmentTextOn: { fontWeight: '600' },
-  kv: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', paddingVertical: 10, paddingRight: CELL_PAD },
+  kv: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'flex-start', paddingVertical: 10, paddingRight: CELL_PAD },
 });
 
 export { fonts };
