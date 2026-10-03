@@ -35,8 +35,24 @@ export function formatDistance(km: number): string {
   return `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
 }
 
-/** Saipan island bounding box (from OSM coastline), padded slightly for pins near the shore. */
+/** Island bounding boxes (from the bundled OSM coastlines), padded slightly for pins near the shore. */
 export const SAIPAN_BBOX: BBox = { minLat: 15.085, maxLat: 15.297, minLng: 145.683, maxLng: 145.837 };
+export const TINIAN_BBOX: BBox = { minLat: 14.915, maxLat: 15.108, minLng: 145.575, maxLng: 145.681 };
+export const ROTA_BBOX: BBox = { minLat: 14.103, maxLat: 14.208, minLng: 145.114, maxLng: 145.298 };
+
+export type IslandId = 'saipan' | 'tinian' | 'rota';
+export const ISLAND_BBOX: Record<IslandId, BBox> = { saipan: SAIPAN_BBOX, tinian: TINIAN_BBOX, rota: ROTA_BBOX };
+export const ISLAND_NAME: Record<IslandId, string> = { saipan: 'Saipan', tinian: 'Tinian', rota: 'Rota' };
+
+export function inBBox(p: LatLng, b: BBox): boolean {
+  return p.lat >= b.minLat && p.lat <= b.maxLat && p.lng >= b.minLng && p.lng <= b.maxLng;
+}
+
+/** Which island a position is on (by bounding box), or null when at sea / elsewhere. */
+export function islandAt(p: LatLng): IslandId | null {
+  for (const id of ['saipan', 'tinian', 'rota'] as const) if (inBBox(p, ISLAND_BBOX[id])) return id;
+  return null;
+}
 
 export interface Projection {
   width: number;

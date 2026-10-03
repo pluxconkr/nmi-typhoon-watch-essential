@@ -6,7 +6,9 @@ import { useState } from 'react';
 import { Alert, Platform, Text } from 'react-native';
 
 import faq from '@/assets/data/faq.json';
+import rota from '@/assets/data/rota-coastline.json';
 import saipan from '@/assets/data/saipan-coastline.json';
+import tinian from '@/assets/data/tinian-coastline.json';
 import { files } from '@/data/files';
 import { resetAllData, shelterRepo } from '@/data/repos';
 import { formatChstStamp, isStale, relativeAgo } from '@/domain/time';
@@ -51,7 +53,7 @@ export default function DownloadsScreen() {
       when: shelterSource === 'network' && cacheMeta.shelters?.fetchedAt ? `saved ${relativeAgo(cacheMeta.shelters.fetchedAt)}` : `bundled · v${shelterRepo.bundledVersion()}`,
       stale: shelterSource === 'network' && cacheMeta.shelters?.fetchedAt ? isStale(cacheMeta.shelters.fetchedAt) : false,
     },
-    { key: 'map', icon: 'map', name: 'Map · Saipan coastline', size: kb(JSON.stringify(saipan).length), saved: true, when: 'bundled · OpenStreetMap vector', stale: false },
+    { key: 'map', icon: 'map', name: 'Map · Saipan, Tinian, Rota', size: kb(JSON.stringify(saipan).length + JSON.stringify(tinian).length + JSON.stringify(rota).length), saved: true, when: 'bundled · OpenStreetMap vector coastlines', stale: false },
     {
       key: 'alerts',
       icon: 'alertOutline',

@@ -13,7 +13,7 @@ Offline-first typhoon preparedness app for Saipan and the CNMI. Congressional Ap
 | Past notices (S-03) | Every alert received, newest first. Last 50 or 90 days. | Yes |
 | **Checklist** | Water, food, medication, batteries, cash, documents… computed from *your* household by a rules table. "Why this number?" shows the multiplication. | Yes — checks survive restart and power loss |
 | Household editor (S-05) | Change people / elders / infants / pets / generator / supply period with a live "60 L → 84 L" preview. | Yes |
-| **Shelter** | Vector map of Saipan (OpenStreetMap coastline bundled in the app) with shelter pins and your GPS position, list sorted by straight-line distance, elderly/medical filter. | Yes — zero network requests on this screen |
+| **Shelter** | Vector maps of Saipan, Tinian and Rota (OpenStreetMap coastlines bundled in the app) with shelter pins and your GPS position, opening on the island you are on, list sorted by straight-line distance, elderly/medical filter. | Yes — zero network requests on this screen |
 | Shelter detail (S-07) | Landmark directions written in advance, HSEM phone (tel:), what to bring from your checklist, last-verified date. | Yes |
 | Offline data (S-08) | What is saved, how big, and when. Refresh button, notification toggle, demo scenarios, data licences, reset. | Yes |
 | What do I do if… (S-09) | Six during-storm situations + after-storm guidance from FEMA / CDC / Red Cross / NWS. 911 and HSEM pinned. | Yes — bundled |
@@ -107,11 +107,15 @@ Once `expo-dev-client` is installed, `npx expo start` opens development builds b
 
 Offline data → **Demo & testing** → Before / During / After. These load the real NWS Tiyan GU text for Super Typhoon Sinlaku (12–17 April 2026, recovered from the IEM VTEC archive) with timestamps shifted to "now", so the countdown, window logic and phase screens can be shown at any time. Demo notices are labelled everywhere they appear. "Simulate no signal" shows the OFFLINE banner and blocks all network calls inside the app; the real test is airplane mode.
 
+Deep links do the same from a terminal or a test script, e.g. `nmityphoonwatch://?demo=before` (also `during`, `after`, `live`) and `nmityphoonwatch://shelter?island=tinian` (also `saipan`, `rota`). On the iOS Simulator with Metro running: `xcrun simctl openurl booted "exp://127.0.0.1:8081/--/shelter?island=rota"`.
+
+Note: Expo Go asks for notification permission on its own when a project uses expo-notifications. The app itself only asks the first time a real NWS alert arrives (and never when "Notify me about new NWS alerts" is off), which is what a development build shows.
+
 ## Data and licences
 
 - Alerts: National Weather Service (public domain). Sender for CNMI is **NWS Tiyan GU** (WFO GUM); Saipan is forecast zone MPZ003 / county MPC110; timezone `Pacific/Saipan` (ChST, UTC+10, no DST).
 - Wind forecast: [Weather data by Open-Meteo.com](https://open-meteo.com/), CC BY 4.0, non-commercial use.
-- Map data: © OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright. The simplified coastline in `assets/data/` is a derivative database and stays under ODbL.
+- Map data: © OpenStreetMap contributors, ODbL 1.0 — https://www.openstreetmap.org/copyright. The simplified coastlines in `assets/data/` are derivative databases and stay under ODbL.
 - Village points: OpenStreetMap; Chalan Laulau and Fina Sisu from GeoNames.org (CC BY 4.0); As Teo from Wikidata (CC0).
 - Shelters: 17 facilities (12 Saipan, 3 Tinian, 2 Rota) from CNMI HSEM bulletins #2/#3 (April 2026), JIC SITREPs (April–May 2026) and the HSEM Bavi release (July 2026); evidence trail in [docs/shelter-sources.md](docs/shelter-sources.md). Design capacity is a planning number from press excerpts, not live availability. CNMI public shelters accept only certified service animals. Water points: 13 CUC / FEMA / JIC sites from the Sinlaku and Bavi responses.
 - Guidance text: FEMA / Ready.gov, CDC, American Red Cross, NWS. Sources are cited per entry in `assets/data/faq.json` and per rule in `src/domain/rules.ts`.

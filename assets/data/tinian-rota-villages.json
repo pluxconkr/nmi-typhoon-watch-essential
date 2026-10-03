@@ -1,0 +1,37 @@
+{
+  "attribution": "\u00a9 OpenStreetMap contributors (ODbL); Nominatim lookups 2026-09-21",
+  "villages": [
+    {
+      "island": "tinian",
+      "name": "San Jose",
+      "lat": 14.96958,
+      "lng": 145.62507,
+      "approx": true,
+      "source": "OSM relation 253880 (boundary centroid)"
+    },
+    {
+      "island": "tinian",
+      "name": "Marpo Heights",
+      "lat": 14.97998,
+      "lng": 145.63808,
+      "approx": false,
+      "source": "OSM node 9812651145"
+    },
+    {
+      "island": "rota",
+      "name": "Songsong",
+      "lat": 14.14045,
+      "lng": 145.14134,
+      "approx": true,
+      "source": "OSM relation 253884 (boundary centroid)"
+    },
+    {
+      "island": "rota",
+      "name": "Sinapalo",
+      "lat": 14.16647,
+      "lng": 145.23142,
+      "approx": false,
+      "source": "OSM way 1385249470 (residential area)"
+    }
+  ]
+}

@@ -18,7 +18,7 @@ export const palette = {
   amber: '#8A5A00',
   amberFill: '#FFF3DB',
   label: '#0B0F19',
-  secondaryLabel: 'rgba(60,60,67,0.60)',
+  secondaryLabel: 'rgba(60,60,67,0.75)', // iOS uses 0.60, which is 3.4:1; 0.75 clears WCAG AA 4.5:1 on both surfaces
   tertiaryLabel: 'rgba(60,60,67,0.30)',
   separator: 'rgba(60,60,67,0.16)',
   groupedBackground: '#F2F2F7',
@@ -48,7 +48,7 @@ export const colors = {
   surface: palette.secondaryGroupedBackground,
   fill: palette.fill,
   offlineBar: '#E5E5EA',
-  offlineText: palette.secondaryLabel,
+  offlineText: 'rgba(60,60,67,0.85)', // 5.9:1 on the offline strip
   white: palette.white,
   onDark: 'rgba(255,255,255,0.72)',
 } as const;

@@ -2,11 +2,11 @@
  * S-06 Shelter · offline shelter map + list (tab 3). Zero network requests on this screen.
  * GPS works without a signal; distances are straight-line. Never an empty screen.
  */
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
-import { formatDistance, haversineKm } from '@/domain/geo';
+import { ISLAND_NAME, type IslandId, formatDistance, haversineKm, islandAt } from '@/domain/geo';
 import { isStale, relativeAgo } from '@/domain/time';
 import type { Shelter } from '@/domain/types';
 import { acquireLocation } from '@/services/location';
@@ -30,6 +30,19 @@ export default function ShelterScreen() {
   const household = useAppState((s) => s.household);
   const [filter, setFilter] = useState<Filter>('all');
   const [selected, setSelected] = useState<string | null>(null);
+  // Map island: the one you are on (GPS, works offline) until you pick another; Saipan otherwise.
+  // Deep link for demos and tests: nmityphoonwatch://shelter?island=tinian
+  const { island: islandParam } = useLocalSearchParams<{ island?: string }>();
+  const paramIsland = islandParam === 'saipan' || islandParam === 'tinian' || islandParam === 'rota' ? islandParam : null;
+  const [islandChoice, setIslandChoice] = useState<IslandId | null>(paramIsland);
+  const [appliedParam, setAppliedParam] = useState(paramIsland);
+  if (paramIsland !== appliedParam) {
+    // A new deep link overrides the manual choice (state reset during render, the React-sanctioned pattern).
+    setAppliedParam(paramIsland);
+    setIslandChoice(paramIsland);
+  }
+  const island: IslandId = islandChoice ?? (location ? islandAt(location) : null) ?? 'saipan';
+  const countOn = (id: IslandId) => shelters.filter((s) => s.island === id).length;
 
   useEffect(() => {
     if (locStatus === 'idle') void acquireLocation();
@@ -82,9 +95,18 @@ export default function ShelterScreen() {
         </Callout>
       ) : null}
 
-      <View style={{ marginTop: 8 }}>
-        <IslandMap shelters={shelters} location={location} selectedId={selected} onSelect={(s) => setSelected(s.shelterId)} width={mapWidth} height={Math.round(mapWidth * 0.8)} />
+      <View style={styles.islandPicker}>
+        <Segmented<IslandId>
+          label="Island"
+          options={(['saipan', 'tinian', 'rota'] as const).map((id) => ({ value: id, label: `${ISLAND_NAME[id]} · ${countOn(id)}` }))}
+          value={island}
+          onChange={(id) => {
+            setIslandChoice(id);
+            setSelected(null);
+          }}
+        />
       </View>
+      <IslandMap island={island} shelters={shelters} location={location} selectedId={selected} onSelect={(s) => setSelected(s.shelterId)} width={mapWidth} height={Math.round(mapWidth * 0.8)} />
       <MapLegend hasPosition={!!location} />
       <SectionFooter style={{ paddingHorizontal: 0 }}>{gpsLine}</SectionFooter>
 
@@ -139,4 +161,5 @@ export default function ShelterScreen() {
 
 const styles = StyleSheet.create({
   filter: { marginTop: 10, marginBottom: 2 },
+  islandPicker: { marginTop: 8, marginBottom: 10 },
 });

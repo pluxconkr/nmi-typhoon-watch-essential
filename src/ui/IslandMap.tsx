@@ -1,14 +1,17 @@
 /**
- * Offline vector map of Saipan: OSM coastline (bundled, 400 vertices) + shelter pins + GPS dot.
+ * Offline vector map of one CNMI island: OSM coastline (bundled, simplified) + shelter pins + GPS dot.
  * No tiles, no network, no API keys. Attribution is always visible (ODbL requirement).
  */
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
+import rota from '@/assets/data/rota-coastline.json';
 import saipan from '@/assets/data/saipan-coastline.json';
-import villages from '@/assets/data/saipan-villages.json';
-import { SAIPAN_BBOX, makeProjection, ringToPath } from '@/domain/geo';
+import saipanVillages from '@/assets/data/saipan-villages.json';
+import tinian from '@/assets/data/tinian-coastline.json';
+import otherVillages from '@/assets/data/tinian-rota-villages.json';
+import { ISLAND_BBOX, ISLAND_NAME, type IslandId, makeProjection, ringToPath } from '@/domain/geo';
 import type { LocationFix, Shelter } from '@/domain/types';
 
 import { colors, fonts, palette } from './theme';
@@ -16,11 +19,29 @@ import { colors, fonts, palette } from './theme';
 const NAVY_LINE = palette.navyTint;
 const GREEN_PIN = palette.green;
 
-const LABEL_VILLAGES = ['Garapan', 'Susupe', 'Chalan Kanoa', 'Koblerville', 'Kagman', 'Tanapag', 'San Roque', 'Capitol Hill', 'San Vicente', 'Dandan', 'Marpi', 'Oleai'];
+type Ring = [number, number][];
+interface VillagePoint {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
+/** Per-island bundle: coastline ring, labelled villages (in priority order). */
+const ISLANDS: Record<IslandId, { ring: Ring; villages: VillagePoint[]; labels: string[] }> = {
+  saipan: {
+    ring: saipan.ring as Ring,
+    villages: saipanVillages.villages,
+    labels: ['Garapan', 'Susupe', 'Chalan Kanoa', 'Koblerville', 'Kagman', 'Tanapag', 'San Roque', 'Capitol Hill', 'San Vicente', 'Dandan', 'Marpi', 'Oleai'],
+  },
+  tinian: { ring: tinian.ring as Ring, villages: otherVillages.villages.filter((v) => v.island === 'tinian'), labels: ['San Jose', 'Marpo Heights'] },
+  rota: { ring: rota.ring as Ring, villages: otherVillages.villages.filter((v) => v.island === 'rota'), labels: ['Songsong', 'Sinapalo'] },
+};
+
 /** House glyph, 12×12, centred on 0,0. */
 const HOUSE = 'M-6 0 L0 -6 L6 0 L6 5 L2 5 L2 1 L-2 1 L-2 5 L-6 5 Z';
 
 export function IslandMap({
+  island = 'saipan',
   shelters,
   location,
   selectedId,
@@ -28,22 +49,23 @@ export function IslandMap({
   width,
   height = 240,
 }: {
+  island?: IslandId;
   shelters: Shelter[];
   location: LocationFix | null;
   selectedId?: string | null;
   onSelect?: (s: Shelter) => void;
   width: number;
   height?: number;
-  /** "Bundled with the app" / "Saved · 2 days ago" */
 }) {
-  const proj = useMemo(() => makeProjection(SAIPAN_BBOX, width, height, 14), [width, height]);
-  const coast = useMemo(() => ringToPath(saipan.ring as [number, number][], proj), [proj]);
-  const pins = useMemo(() => shelters.filter((s) => s.island === 'saipan').map((s) => ({ s, ...proj.toXY({ lat: s.lat, lng: s.lng }) })), [shelters, proj]);
+  const data = ISLANDS[island];
+  const proj = useMemo(() => makeProjection(ISLAND_BBOX[island], width, height, 14), [island, width, height]);
+  const coast = useMemo(() => ringToPath(data.ring, proj), [data.ring, proj]);
+  const pins = useMemo(() => shelters.filter((s) => s.island === island).map((s) => ({ s, ...proj.toXY({ lat: s.lat, lng: s.lng }) })), [shelters, island, proj]);
   // Village labels: skip any that would sit on top of a pin, and nudge the rest to the right of their point.
   const labels = useMemo(() => {
     const out: { name: string; x: number; y: number; anchor: 'start' | 'end' }[] = [];
-    for (const name of LABEL_VILLAGES) {
-      const v = villages.villages.find((x) => x.name === name);
+    for (const name of data.labels) {
+      const v = data.villages.find((x) => x.name === name);
       if (!v) continue;
       const p = proj.toXY({ lat: v.lat, lng: v.lng });
       const near = pins.some((pin) => Math.hypot(pin.x - p.x, pin.y - p.y) < 22);
@@ -52,12 +74,12 @@ export function IslandMap({
       out.push({ name, x: p.x + (anchor === 'start' ? 5 : -5), y: p.y + 3.5, anchor });
     }
     return out;
-  }, [pins, proj, width]);
+  }, [data, pins, proj, width]);
   const you = location ? proj.toXY({ lat: location.lat, lng: location.lng }) : null;
   const youInside = you && you.x >= 0 && you.x <= width && you.y >= 0 && you.y <= height;
 
   return (
-    <View style={[styles.wrap, { width, height }]} accessibilityLabel={`Map of Saipan with ${pins.length} shelters${you ? ' and your position' : ''}`} accessibilityRole="image">
+    <View style={[styles.wrap, { width, height }]} accessibilityLabel={`Map of ${ISLAND_NAME[island]} with ${pins.length} shelters${youInside ? ' and your position' : ''}`} accessibilityRole="image">
       <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         <Defs>
           <LinearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
@@ -102,6 +124,9 @@ export function IslandMap({
           <SvgText x={0} y={18} fontSize={9} fontWeight="800" fill={colors.ink2} textAnchor="middle">N</SvgText>
         </G>
       </Svg>
+      <View style={styles.islandTag} pointerEvents="none">
+        <Text style={styles.islandTagText}>{ISLAND_NAME[island]}</Text>
+      </View>
       {you && !youInside ? (
         <View style={styles.offIsland}>
           <Text style={styles.offIslandText}>Your position is off this map</Text>
@@ -124,7 +149,7 @@ export function MapLegend({ hasPosition }: { hasPosition: boolean }) {
       </View>
       <View style={styles.legendItem}>
         <View style={[styles.legendDot, { backgroundColor: colors.tint, opacity: hasPosition ? 1 : 0.35 }]} />
-        <Text style={[styles.legendText, !hasPosition && { color: colors.ink4 }]}>{hasPosition ? 'You (GPS)' : 'You (no GPS fix yet)'}</Text>
+        <Text style={styles.legendText}>{hasPosition ? 'You (GPS)' : 'You (no GPS fix yet)'}</Text>
       </View>
     </View>
   );
@@ -134,7 +159,9 @@ const styles = StyleSheet.create({
   wrap: { backgroundColor: '#E3EDF8', borderRadius: 12, overflow: 'hidden' },
   attrib: { position: 'absolute', left: 8, bottom: 8, backgroundColor: 'rgba(255,255,255,0.85)', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 5 },
   attribText: { fontSize: 9.5, color: colors.ink2 },
-  offIsland: { position: 'absolute', top: 8, left: 8, backgroundColor: 'rgba(255,255,255,0.92)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  islandTag: { position: 'absolute', top: 8, left: 8 },
+  islandTagText: { fontSize: 13, fontWeight: '600', color: colors.ink2, letterSpacing: -0.08 },
+  offIsland: { position: 'absolute', top: 30, left: 8, backgroundColor: 'rgba(255,255,255,0.92)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
   offIslandText: { fontSize: 11, fontWeight: '700', color: colors.ink2 },
   legend: { flexDirection: 'row', gap: 16, marginTop: 8 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },

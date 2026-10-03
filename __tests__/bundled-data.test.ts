@@ -3,11 +3,14 @@
  */
 import demo from '@/assets/data/demo-alerts.json';
 import faq from '@/assets/data/faq.json';
+import rota from '@/assets/data/rota-coastline.json';
 import saipan from '@/assets/data/saipan-coastline.json';
 import shelters from '@/assets/data/shelters.json';
 import villages from '@/assets/data/saipan-villages.json';
+import tinian from '@/assets/data/tinian-coastline.json';
+import otherVillages from '@/assets/data/tinian-rota-villages.json';
 import water from '@/assets/data/water-points.json';
-import { SAIPAN_BBOX } from '@/domain/geo';
+import { ISLAND_BBOX, SAIPAN_BBOX, islandAt } from '@/domain/geo';
 import type { FaqEntry, Shelter, WaterPoint } from '@/domain/types';
 
 const inBox = (lat: number, lng: number, box: { minLat: number; maxLat: number; minLng: number; maxLng: number }) =>
@@ -36,10 +39,10 @@ describe('bundled shelters', () => {
     expect(ids).toEqual(expect.arrayContaining(['marianas-high-school', 'koblerville-elementary-school', 'kagman-high-school']));
   });
 
-  test('Saipan pins fall inside the island bounding box; other islands fall outside it', () => {
+  test('every pin falls inside the bounding box of the island it claims', () => {
     for (const s of list) {
-      const inside = inBox(s.lat, s.lng, SAIPAN_BBOX);
-      expect(inside).toBe(s.island === 'saipan');
+      expect(inBox(s.lat, s.lng, SAIPAN_BBOX)).toBe(s.island === 'saipan');
+      expect(islandAt(s)).toBe(s.island);
     }
   });
 
@@ -74,12 +77,17 @@ describe('bundled water points, FAQ, geodata, demo alerts', () => {
     }
   });
 
-  test('coastline ring is closed-ish, inside the bbox, and attributed to OSM', () => {
-    const ring = saipan.ring as [number, number][];
-    expect(ring.length).toBe(400);
-    for (const [lng, lat] of ring) expect(inBox(lat, lng, SAIPAN_BBOX)).toBe(true);
-    expect(saipan.attribution).toMatch(/OpenStreetMap/);
+  test('each island coastline sits inside its bbox and is attributed to OSM', () => {
+    const coasts = { saipan: [saipan, 400], tinian: [tinian, 200], rota: [rota, 199] } as const;
+    for (const [id, [coast, verts]] of Object.entries(coasts)) {
+      const ring = coast.ring as [number, number][];
+      expect(ring.length).toBe(verts);
+      for (const [lng, lat] of ring) expect(inBox(lat, lng, ISLAND_BBOX[id as keyof typeof ISLAND_BBOX])).toBe(true);
+      expect(coast.attribution).toMatch(/OpenStreetMap/);
+    }
     expect(villages.villages.length).toBe(26);
+    expect(otherVillages.villages).toHaveLength(4);
+    for (const v of otherVillages.villages) expect(islandAt(v)).toBe(v.island);
   });
 
   test('demo alerts are real NWS Tiyan GU products for Sinlaku', () => {
