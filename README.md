@@ -98,8 +98,14 @@ eas build --profile development-simulator --platform ios  # same, for the iOS Si
 eas build --profile preview --platform android            # installable APK
 eas build --profile production --platform all             # store builds, version auto-incremented
 eas submit --profile production --platform ios            # TestFlight / App Store
-eas submit --profile production --platform android        # Play Console
+eas submit --profile production --platform android        # Play Console, internal testing track
 ```
+
+**5. Test distribution**
+
+- iOS → TestFlight: `eas build -p ios --profile production --auto-submit`. The first time, EAS signs in with your Apple ID, creates the signing certificate and profile, and creates the app record in App Store Connect if it does not exist. The build then appears under TestFlight → Internal Testing; add testers in App Store Connect.
+- Android → Play internal testing: build with `eas build -p android --profile production` (an `.aab`), create the app in Play Console and **upload that first `.aab` by hand** to Internal testing (Google requires the first upload to be manual). After that, put a Play service-account JSON at `google-play-service-account.json` (gitignored) and `eas submit -p android --latest` uploads to the internal track automatically.
+- Build numbers are managed on EAS (`appVersionSource: remote`, `autoIncrement: true` on the production profile); bump `expo.version` in `app.json` only for a new marketing version.
 
 Once `expo-dev-client` is installed, `npx expo start` opens development builds by default. Use `npx expo start --go` to keep using Expo Go.
 

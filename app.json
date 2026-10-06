@@ -13,11 +13,14 @@
       "bundleIdentifier": "com.27363.nmityphoonwatch",
       "infoPlist": {
         "UIBackgroundModes": [
+          "processing",
           "processing"
         ],
         "BGTaskSchedulerPermittedIdentifiers": [
+          "com.expo.modules.backgroundtask.processing",
           "com.expo.modules.backgroundtask.processing"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -28,7 +31,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.tstst.nmityphoonwatch"
+      "package": "com.tstst.nmityphoonwatch",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "output": "server",
@@ -68,6 +75,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dbf197bc-66d0-4ca3-8436-718b1561e0c4"
+      }
     }
   }
 }

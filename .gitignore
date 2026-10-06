@@ -5,6 +5,7 @@ node_modules/
 
 # Expo
 .expo/
+.omc/
 dist/
 web-build/
 expo-env.d.ts
@@ -41,3 +42,6 @@ example
 # generated native folders
 /ios
 /android
+
+# store credentials (never commit)
+google-play-service-account.json

@@ -28,6 +28,12 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {},
+      "android": {
+        "track": "internal",
+        "serviceAccountKeyPath": "./google-play-service-account.json"
+      }
+    }
   }
 }
