@@ -115,6 +115,42 @@ export interface Shelter {
   verifiedBy: string;
   coordConfidence?: 'high' | 'medium' | 'low';
   notes?: string;
+  /** 'current' = named in the latest HSEM/JIC shelter announcement; 'past' = used in an earlier storm only. */
+  designation: 'current' | 'past';
+  /** Named by the JIC for residents needing medical support or shelter assistance (latest announcement). */
+  medicalSupport: boolean;
+  /** Safety warning shown before anything else (e.g. storm damage). */
+  caution: string | null;
+}
+
+/** Where residents can buy supplies. Only places with a 2025–26 source are 'operating'; closed ones are not bundled. */
+export type SupplyCategory = 'grocery' | 'convenience' | 'pharmacy' | 'hardware' | 'fuel';
+
+export interface SupplySource {
+  url: string;
+  date: string;
+  what: string;
+}
+
+export interface SupplyStore {
+  id: string;
+  name: string;
+  category: SupplyCategory;
+  island: Island;
+  village: string;
+  address: string | null;
+  lat: number;
+  lng: number;
+  coordSource: string;
+  coordConfidence: 'high' | 'medium' | 'low';
+  phone: string | null;
+  hours: string | null;
+  status: 'operating' | 'unknown';
+  statusEvidence: string;
+  sources: SupplySource[];
+  /** ISO date the record was last checked against its sources. */
+  lastVerified: string;
+  notes: string | null;
 }
 
 export interface WaterPoint {
@@ -198,11 +234,20 @@ export interface TaskItem {
 /** Demo scenario override used for judging/video. 'live' = derive from real data. */
 export type DemoScenario = 'live' | 'before' | 'during' | 'after' | 'calm';
 
+/** How often to check NWS: 'auto' (hourly; every 10 min while a storm alert is in Before or During) or fixed minutes. */
+export type PollInterval = 'auto' | 5 | 10 | 15 | 30 | 60;
+
+/** Fixed positions that stand in for GPS so directions can be demonstrated off-island (demo only). */
+export type DemoPositionId = 'garapan' | 'koblerville' | 'kagman' | 'san-jose-tinian' | 'songsong-rota';
+
 export interface Settings {
   demoScenario: DemoScenario;
   /** Simulate offline in the UI regardless of the real network state (demo only). */
   simulateOffline: boolean;
   notificationsEnabled: boolean;
+  /** When set, this labelled position replaces GPS everywhere (demo only). */
+  demoPosition: DemoPositionId | null;
+  pollInterval: PollInterval;
 }
 
 export interface LocationFix {
@@ -211,4 +256,10 @@ export interface LocationFix {
   accuracyM: number | null;
   /** Epoch ms. */
   at: number;
+  /** Direction of travel in degrees from north, when the device is moving. */
+  heading?: number | null;
+  /** Metres per second, when known. */
+  speed?: number | null;
+  /** Set when this is a demo position, not GPS. */
+  demo?: DemoPositionId | null;
 }

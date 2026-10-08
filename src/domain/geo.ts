@@ -59,24 +59,36 @@ export interface Projection {
   height: number;
   /** Project a coordinate to SVG space. */
   toXY: (p: LatLng) => { x: number; y: number };
+  /** The coordinate drawn at an SVG point (inverse of toXY). */
+  toLatLng: (x: number, y: number) => LatLng;
+}
+
+/** Zoom into a fitted map: `zoom` × the fitted scale, with `center` drawn at the middle of the box. */
+export interface MapZoom {
+  zoom: number;
+  center: LatLng;
 }
 
 /**
  * Equirectangular projection that fits `bbox` into a width×height box, preserving
  * aspect ratio (longitude scaled by cos(mid-latitude)), centred with padding.
+ * With `view`, the fitted map is zoomed by view.zoom and recentred on view.center.
  */
-export function makeProjection(bbox: BBox, width: number, height: number, padding = 8): Projection {
+export function makeProjection(bbox: BBox, width: number, height: number, padding = 8, view?: MapZoom | null): Projection {
   const midLat = (bbox.minLat + bbox.maxLat) / 2;
   const kx = Math.cos(toRad(midLat));
   const spanX = (bbox.maxLng - bbox.minLng) * kx;
   const spanY = bbox.maxLat - bbox.minLat;
   const innerW = Math.max(1, width - padding * 2);
   const innerH = Math.max(1, height - padding * 2);
-  const scale = Math.min(innerW / spanX, innerH / spanY);
-  const drawnW = spanX * scale;
-  const drawnH = spanY * scale;
-  const offX = padding + (innerW - drawnW) / 2;
-  const offY = padding + (innerH - drawnH) / 2;
+  const fit = Math.min(innerW / spanX, innerH / spanY);
+  const scale = fit * (view?.zoom ?? 1);
+  let offX = padding + (innerW - spanX * fit) / 2;
+  let offY = padding + (innerH - spanY * fit) / 2;
+  if (view) {
+    offX = width / 2 - (view.center.lng - bbox.minLng) * kx * scale;
+    offY = height / 2 - (bbox.maxLat - view.center.lat) * scale;
+  }
   return {
     width,
     height,
@@ -84,6 +96,7 @@ export function makeProjection(bbox: BBox, width: number, height: number, paddin
       x: offX + (p.lng - bbox.minLng) * kx * scale,
       y: offY + (bbox.maxLat - p.lat) * scale,
     }),
+    toLatLng: (x, y) => ({ lng: bbox.minLng + (x - offX) / (kx * scale), lat: bbox.maxLat - (y - offY) / scale }),
   };
 }
 

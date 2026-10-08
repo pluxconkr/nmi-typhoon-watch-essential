@@ -1,4 +1,4 @@
-# Offline acceptance tests (T1–T9)
+# Acceptance tests (T1–T13)
 
 From the handoff spec, tab 05. All must pass on a physical phone before release. The point of T2 is a screenshot: airplane-mode icon + empty network log + working app in one frame.
 
@@ -15,6 +15,10 @@ Preparation: install a development build (or Expo Go), open the app once online 
 | T7 | Interrupted refresh | Start "Refresh everything now", cut the network mid-way | Previously saved data still shown; status line reports failed items; retry works. (v1 has no multi-MB tile download, so partial-file recovery is not applicable.) |
 | T8 | Stale data warning | Set the device clock 8 days ahead → open Shelter and Offline data | Amber "older than 7 days" warning appears (only when a downloaded shelter list exists); data still displayed. |
 | T9 | Timezone | Run the same demo scenario with the device set to ChST (UTC+10) and to KST (UTC+9) | Countdown target and all "ChST" stamps are identical in both settings. (Also covered by `__tests__/windows-time.test.ts`.) |
+| T10 | Offline directions | Airplane mode ON → Shelter tab → **Start navigation** (on the islands, or with Settings → Demo GPS position) | Full-screen navigation opens with a maneuver and a time; the request log stays empty (add the navigation screen to the T2 walk-through). |
+| T11 | Driving a route | On the Simulator: `xcrun simctl location booted start --speed=20 - < waypoints.txt` along the planned route; then send a few points 300 m off the route | Banner advances maneuver by maneuver, time left falls, travelled part turns grey; after three off-route fixes the route is re-planned; at the end "You have arrived". |
+| T12 | Alert polling | Settings → Check for new alerts → Automatic. Load demo **Before**. | Settings says "every 10 minutes … in effect"; back on Live with no alert it says "every hour". With the app open, a check is attempted when the interval passes (Offline data → Alert history time updates). |
+| T13 | Map gestures | Shelter tab map and the navigation map, on the phone (in the Simulator, hold ⌥ and drag to pinch): pinch in and out, drag with one finger, pinch then keep dragging with one finger, double-tap, swipe twice quickly | The point under your fingers stays under them; lines and labels are sharp again as soon as you let go, with no jump or blink. Shelter tab: one-finger drag scrolls the page until you have zoomed in, then moves the map; "All of Saipan" goes back. Navigation: touching the map stops following, Re-centre follows again. |
 
 ## State matrix (S-10) — every screen must handle all six
 

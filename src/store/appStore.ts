@@ -19,6 +19,8 @@ import {
   shelterRepo,
   storageNoticeRepo,
 } from '@/data/repos';
+import { demoPositionFix } from '@/domain/demoPositions';
+import { haversineKm } from '@/domain/geo';
 import { RULES_VERSION } from '@/domain/rules';
 import { nowIso } from '@/domain/time';
 import type {
@@ -53,7 +55,8 @@ export interface AppState {
   settings: Settings;
   network: NetworkInfo;
   location: LocationFix | null;
-  locationStatus: 'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable';
+  /** 'off' = Location Services disabled for the whole device. */
+  locationStatus: 'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable' | 'off';
   /** Epoch ms of the last completed refresh attempt (any result). */
   lastRefreshAt: number | null;
   refreshing: boolean;
@@ -124,7 +127,8 @@ export function hydrate(): AppState {
     forecast: forecastRepo.get(),
     cacheMeta: cacheMetaRepo.getAll(),
     settings: settingsRepo.get(),
-    location: locationRepo.get(),
+    // A demo position replaces GPS until it is switched off; otherwise start from the last saved fix.
+    location: settingsRepo.get().demoPosition ? demoPositionFix(settingsRepo.get().demoPosition!) : locationRepo.get(),
     storageNotice: storageNoticeRepo.get(),
   };
   emit();
@@ -190,8 +194,21 @@ export const actions = {
     setState({ network: n });
   },
   setLocation(fix: LocationFix | null, status: AppState['locationStatus']) {
-    if (fix) locationRepo.set(fix);
+    // A demo position stands in for GPS until it is switched off: late GPS answers must not replace it.
+    if (fix && !fix.demo && state.settings.demoPosition) return;
+    if (fix && !fix.demo && shouldPersistFix(fix)) locationRepo.set(fix);
     setState({ location: fix ?? state.location, locationStatus: status });
+  },
+  setLocationStatus(status: AppState['locationStatus']) {
+    setState({ locationStatus: status });
+  },
+  /** Forget the current position (used when a demo position is switched off). */
+  clearLocation() {
+    setState({ location: null, locationStatus: 'idle' });
+  },
+  /** GPS is not available (permission or Location Services off): an earlier fix is no longer where you are. */
+  loseLocation(status: 'denied' | 'off') {
+    setState({ location: null, locationStatus: status });
   },
   setRefreshing(refreshing: boolean, lastRefreshAt?: number) {
     setState({ refreshing, ...(refreshing ? {} : { refreshProgress: null }), ...(lastRefreshAt !== undefined ? { lastRefreshAt } : {}) });
@@ -207,6 +224,14 @@ export const actions = {
     hydrate();
   },
 };
+
+// GPS can update every second during navigation; only write to disk when the position meaningfully changes.
+let persistedFix: LocationFix | null = null;
+function shouldPersistFix(fix: LocationFix): boolean {
+  const due = !persistedFix || fix.at - persistedFix.at > 120_000 || haversineKm(persistedFix, fix) > 0.1;
+  if (due) persistedFix = fix;
+  return due;
+}
 
 /** Effective "offline" flag: real network state, or the demo override. */
 export function isOfflineNow(s: AppState = state): boolean {

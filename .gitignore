@@ -45,3 +45,6 @@ example
 
 # store credentials (never commit)
 google-play-service-account.json
+
+# OSM downloads used by scripts/build-roads.py
+scripts/.osm-cache/

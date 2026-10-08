@@ -324,7 +324,7 @@ export function Segmented<T extends string | number>({ options, value, onChange,
         const on = o.value === value;
         return (
           <Pressable key={String(o.value)} onPress={() => onChange(o.value)} accessibilityRole="radio" accessibilityState={{ selected: on, checked: on }} style={[styles.segment, on && styles.segmentOn]}>
-            <Text maxFontSizeMultiplier={1.3} numberOfLines={2} style={[styles.segmentText, on && styles.segmentTextOn]}>{o.label}</Text>
+            <Text maxFontSizeMultiplier={1.3} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={[styles.segmentText, on && styles.segmentTextOn]}>{o.label}</Text>
           </Pressable>
         );
       })}

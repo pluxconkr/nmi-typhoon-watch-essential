@@ -222,3 +222,269 @@ Excluded on purpose: Dandan Middle School (single blocked 2019 article), Koblerv
 * **Phones**: only the Rota Office on Aging (HSEM-published) and the Saipan Office on Aging (government directory) have numbers; schools carry none.
 * **Rota water**: CUC ran a Rota water filling station after Bavi (7 Jul 2026 advisory, image only) - location unknown, so it is not in `water-points.json`. Tinian 2026: no filling-station list found (water system stayed largely online).
 * **Yutu full roster**: 14-17 shelters were open in Oct-Nov 2018 but no complete list survives online; only the eight named above.
+
+## Re-verification, 7 October 2026
+
+Latest official shelter announcement found: **Super Typhoon Bavi (09W)**, 2026-07-05 (CNMI JIC releases 2–5 July 2026). No shelter announcement was found for Tropical Storm Choi-wan (October 2026). Releases:
+
+- https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- https://www.mvariety.com/news/local/local-news-updated-shelter-information-for-rota/article_ceca4090-96a3-41bd-bbf6-23125e9225fc.html/
+- https://www.mvariety.com/news/local/local-news-rota-shelters-update/article_b7d0aefc-5be6-4678-89cd-1203c6558477.html/
+- https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- https://drive.google.com/file/d/1bDu4dhb-tFDLtyyq7LescX7C3wTYl3PC/view
+- https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-9-july-28-2026---6-30-pm-chst/article_1b2d9c7e-2d96-44a7-a9de-3d61c487e2fc.html
+- https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-as-of-wednesday-aug-5/article_f05095ac-ff26-4d45-8ce1-789f22b0c7f7.html
+
+What changed in `assets/data/shelters.json` (version 2026.10.07):
+
+- Every record now has `designation`: **current** = named in the Bavi releases (10 shelters), **past** = used only in an earlier storm (7). Directions to the "nearest shelter" only consider current shelters.
+- `medicalSupport` = named in the JIC Typhoon Condition I release (5 Jul 2026, 2:15 pm) for "residents in vulnerable housing, low-lying areas, and those needing medical support or shelter assistance": Kagman Community Center (Saipan), Tinian Middle and High School, Rota Aging Office, Dr. Rita Hocog Inos Jr./Sr. High School. This replaces the earlier wheelchair-based filter, whose only match was the storm-damaged Man'amko' Center.
+- `caution` on the Saipan Office on Aging (Man'amko' Center): roof and windows lost in Sinlaku, not fully reopened (Marianas Variety, 16 Jul 2026).
+
+| Shelter | On Bavi list | Change |
+|---|---|---|
+| Kagman High School | yes | — |
+| Koblerville Elementary School | yes | — |
+| Marianas High School | yes | — |
+| DCCA Kagman Community Center | yes | Landmark text adds Kagman Road / Kagman Market / fire station; marked medical support. |
+| Dandan Head Start (Dandan School campus) | not-mentioned | — |
+| Garapan Elementary School | yes | — |
+| Kagman Elementary School | not-mentioned | — |
+| Oleai Head Start | not-mentioned | Name shortened (campus location not confirmed); landmark text rewritten. |
+| Saipan Office on Aging (Man'amko Center) | not-mentioned | Marked "earlier storms only" and given a damage warning; excluded from "nearest shelter" directions. |
+| Saipan Southern High School | not-mentioned | — |
+| Tanapag Middle School | not-mentioned | — |
+| Tanapag Youth Center | not-mentioned | — |
+| Magdalena M. Hofschneider Tinian Head Start | yes | Pin moved 246 m from the village centre onto the Tinian Elementary School campus (1 CMC 446). Landmark text rewritten. |
+| Tinian Elementary School | yes | Design capacity set to 40 (PSS). |
+| Tinian Middle School and Tinian High School | yes | — |
+| Dr. Rita Hocog Inos Jr./Sr. High School | yes | Pin moved about 1.2 km, from the former Rota High School building (now DLNR offices) to the shelter campus off Pali'E Road (Red Cross plus code 44RW+733; NCES geocode 27 m away). Landmark text rewritten. |
+| Sinapalo Office on Aging (Rota Aging Center) | yes | — |
+
+Sources per shelter (re-check):
+
+### Kagman High School
+
+- Finding: Bavi primary shelter (opened 3 Jul 2026 3 pm). Counts: 81 (5 Jul), 69 (6 Jul), 49 (7 Jul); absent from the 13 Jul roster. At 14:15 on 5 Jul the JIC called Kagman Community Center Saipan's 'only available shelter', so the primaries were full or closed to newcomers by then. School office phone per NCES: (670) 664-3780 (not announced as a shelter line).
+- Location: Shelter is the KHS cafeteria. Red Cross address 'Half Flower Street'. From the pin, OSM has Lalanghita Road 85 m, Half Flower Street 88 m and Kagman Road (NMI-34) 98 m away. Kagman Elementary School is next door.
+- Coordinates: Pin is 39 m from the OSM campus centre (way 257204518, 15.16762,145.78449) and inside the polygon; NCES 2023-24 geocode 15.16769,145.78443.
+- Source (2026-07-02): CNMI JIC Bavi shelter release 19:20 ChST (bit.ly/3QV7MyK): Saipan list includes 'Kagman High School'; opens 3 Jul 2026 3:00 pm. — https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): 'Kagman High School' among available shelters at 7 pm 4 Jul. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): Marianas Variety citing JIC, counts as of 11 a.m. 5 Jul [MV live site captcha-blocked; read via web.archive.org 20260705192119]: KHS 'sheltered 81'. — https://www.mvariety.com/news/local/local-news-hundreds-evacuate-to-shelters-as-super-typhoon-bavi-nears-marianas/article_c4b8a1df-65a9-4fb3-a2cc-9fecd984cf10.html/
+- Source (2026-07-06): KPRG citing JIC, counts 6 Jul (quoted in docs/shelter-sources.md; URL re-checked 200): '69 at Kagman High School'. — https://www.islapublic.org/news/2026-07-06/more-than-500-residents-take-shelter-as-bavi-pounds-the-marianas
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'Kagman High School: 49' (7 Jul). — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco) quoting PSS Commissioner Camacho, Sinlaku secondary shelters [MV live site captcha-blocked; read via web.archive.org 20260413054743]: KHS cafeteria 'nearing capacity with 61 evacuees out of an 80-person limit'. — https://www.mvariety.com/news/local/local-news-pss-activates-secondary-shelters-as-evacuee-numbers-rise-ahead-of-sinlaku/article_64ba73f3-8d9d-46bf-b006-37f52643c7d9.html/
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco), PSS shelter capacities [MV live site captcha-blocked; read via web.archive.org 20260413045255]: 'Kagman High School's cafeteria, with an 80-person capacity'. — https://www.mvariety.com/news/local/local-news-shelters-across-saipan-tinian-exceed-50-capacity-as-sinlaku-nears/article_16cff46e-7e8b-4d3b-bf27-4725f094d0f8.html/
+- Source (2026-04-13): Marianas Variety (B. Manabat), Sinlaku shelters [MV live site captcha-blocked; read via web.archive.org 20260413043842]: KHS staff: 'The school's capacity is 50'. — https://www.mvariety.com/news/local/local-news-166-residents-in-shelters-as-sinlaku-approaches-marianas/article_31f79a8f-1b83-4737-a711-02c9a0558c81.html/
+- Source (2026-04-17): American Red Cross open-shelter list in AKF guide (URL re-checked 200): 'Kagman High School- Half Flower Street'. — https://www.kidneyfund.org/sites/default/files/media/documents/drp-resource-guide-typhoon-sinlaku-4-17-2026.pdf
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): Kagman High School, phone (670) 664-3780. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200073
+
+### Koblerville Elementary School
+
+- Finding: Bavi primary shelter: 69 (5 Jul), 66 (6 Jul); closed by 7 Jul. School office phone per NCES: (670) 664-3961.
+- Location: Shelter is in the cafeteria. Red Cross address 'As Gonno Road'. The pin is on Atis Street (4 m), with As Gonno Road (NMI-304) 164 m away; Saipan Southern High School adjoins.
+- Coordinates: Pin is 13 m from the OSM campus centre (way 311254046, 15.11931,145.70500); NCES geocode 15.11906,145.705703 is in the same polygon.
+- Source (2026-07-02): CNMI JIC Bavi shelter release 19:20 ChST (bit.ly/3QV7MyK): 'Koblerville Elementary School' on the Saipan list. — https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): listed available 7 pm 4 Jul. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): Marianas Variety citing JIC, counts as of 11 a.m. 5 Jul [MV live site captcha-blocked; read via web.archive.org 20260705192119]: 'Koblerville Elementary School housed 69'. — https://www.mvariety.com/news/local/local-news-hundreds-evacuate-to-shelters-as-super-typhoon-bavi-nears-marianas/article_c4b8a1df-65a9-4fb3-a2cc-9fecd984cf10.html/
+- Source (2026-07-06): KPRG citing JIC, counts 6 Jul (quoted in docs/shelter-sources.md; URL re-checked 200): '66 at Kobler Elementary School'. — https://www.islapublic.org/news/2026-07-06/more-than-500-residents-take-shelter-as-bavi-pounds-the-marianas
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: not on the 7 Jul roster. — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco), PSS shelter capacities [MV live site captcha-blocked; read via web.archive.org 20260413045255]: 'can accommodate up to 100 individuals'. — https://www.mvariety.com/news/local/local-news-shelters-across-saipan-tinian-exceed-50-capacity-as-sinlaku-nears/article_16cff46e-7e8b-4d3b-bf27-4725f094d0f8.html/
+- Source (2026-04-13): Marianas Variety (B. Manabat), Sinlaku shelters [MV live site captcha-blocked; read via web.archive.org 20260413043842]: 'KoES can accommodate up to 418 people'. — https://www.mvariety.com/news/local/local-news-166-residents-in-shelters-as-sinlaku-approaches-marianas/article_31f79a8f-1b83-4737-a711-02c9a0558c81.html/
+- Source (2026-07-27): Marianas Variety, PSS Rota schools after Bavi [MV live site captcha-blocked; read via web.archive.org 20260727051240]: some Koblerville ES buildings 'remain without power because of Sinlaku-related damage'. — https://www.mvariety.com/news/local/rota-schools-begin-recovery-after-bavi-pss-faces-new-fiscal-challenges/article_54254006-d9e5-40b2-9300-bc6eed8910d1.html
+- Source (2026-04-17): American Red Cross open-shelter list in AKF guide (URL re-checked 200): 'Koblerville Elementary School- As Gonno Road'. — https://www.kidneyfund.org/sites/default/files/media/documents/drp-resource-guide-typhoon-sinlaku-4-17-2026.pdf
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 664-3961. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200079
+
+### Marianas High School
+
+- Finding: Bavi primary shelter: 145 (5 Jul), 150 (6 Jul), 86 + 29 (7 Jul); closed by 13 Jul. School office phone per NCES: (670) 664-3800.
+- Location: Two units: the main cafeteria ('Marianas High School 1') and the second cafeteria ('Marianas High School 2' / 'MHS cafeteria'), 'a short distance from the primary site'. Red Cross address 'Bwaay Lane'; OSM: Dwaay Lane 31 m, Beach Road (NMI-33) 189 m.
+- Coordinates: Pin equals the OSM point (node 1474820826); NCES geocode 15.161161,145.707908 is 67 m away.
+- Source (2026-07-02): CNMI JIC Bavi shelter release 19:20 ChST (bit.ly/3QV7MyK): 'Marianas High School' on the Saipan list. — https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): 'Marianas High School 1 and 2' available 7 pm 4 Jul. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): Marianas Variety citing JIC, counts as of 11 a.m. 5 Jul [MV live site captcha-blocked; read via web.archive.org 20260705192119]: 'Marianas High School sheltered 145'. — https://www.mvariety.com/news/local/local-news-hundreds-evacuate-to-shelters-as-super-typhoon-bavi-nears-marianas/article_c4b8a1df-65a9-4fb3-a2cc-9fecd984cf10.html/
+- Source (2026-07-06): KPRG citing JIC, counts 6 Jul (quoted in docs/shelter-sources.md; URL re-checked 200): '150 individuals sheltered at Marianas High School'. — https://www.islapublic.org/news/2026-07-06/more-than-500-residents-take-shelter-as-bavi-pounds-the-marianas
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'Marianas High School: 86 MHS cafeteria: 29' (7 Jul). — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): MHS and MHS Cafeteria both 'Closed' (13 Jul). — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco) quoting PSS Commissioner Camacho, Sinlaku secondary shelters [MV live site captcha-blocked; read via web.archive.org 20260413054743]: secondary shelter 'in its second cafeteria, a short distance from the primary site'. — https://www.mvariety.com/news/local/local-news-pss-activates-secondary-shelters-as-evacuee-numbers-rise-ahead-of-sinlaku/article_64ba73f3-8d9d-46bf-b006-37f52643c7d9.html/
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco), PSS shelter capacities [MV live site captcha-blocked; read via web.archive.org 20260413045255]: 'the main cafeteria, designed for 100 occupants'. — https://www.mvariety.com/news/local/local-news-shelters-across-saipan-tinian-exceed-50-capacity-as-sinlaku-nears/article_16cff46e-7e8b-4d3b-bf27-4725f094d0f8.html/
+- Source (2026-04-13): Marianas Variety (B. Manabat), Sinlaku shelters [MV live site captcha-blocked; read via web.archive.org 20260413043842]: MHS 'has a capacity of 80'. — https://www.mvariety.com/news/local/local-news-166-residents-in-shelters-as-sinlaku-approaches-marianas/article_31f79a8f-1b83-4737-a711-02c9a0558c81.html/
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 664-3800. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200056
+
+### DCCA Kagman Community Center
+
+- Finding: During Bavi this was Saipan's only open shelter from 14:15 on 5 Jul, and the last Saipan shelter to close (closed by 28 Jul 2026). Its low-confidence pin is the most important coordinate gap left; it needs an official address or a ground check.
+- Location: On or near Kagman Road (NMI-34) in Kagman III: the current pin is 59 m from Kagman Road, about 600 m west of Kagman High School on the same road. This matches CUC's phrase 'Kagman Road toward Kagman Market, Community Center and Fire Station'.
+- Coordinates: Nominatim has no result and OSM has no community centre in Kagman. The current pin comes from a third-party plus code (5Q8H+RC9, evendo.com) and lands on an unnamed 745 m2 building (OSM way 638018498) 59 m from Kagman Road. Plausible, but no official address confirms it.
+- Source (2026-07-05): CNMI JIC Typhoon Condition I release 14:15 ChST (bit.ly/3R0jqbv): 'Saipan: The only available shelter at this time is the Kagman Community Center.' — https://drive.google.com/file/d/1bDu4dhb-tFDLtyyq7LescX7C3wTYl3PC/view
+- Source (2026-07-06): KPRG citing JIC, counts 6 Jul (quoted in docs/shelter-sources.md; URL re-checked 200): '33 at Kagman Community Center'. — https://www.islapublic.org/news/2026-07-06/more-than-500-residents-take-shelter-as-bavi-pounds-the-marianas
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'Kagman Community Center: 19' (7 Jul). — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): Kagman Community Center 31 (13 Jul). — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-07-15): JIC SitRep #5 via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260716091102]: 'Saipan (Kagman Community Center): 21 occupants'. — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-5-july-15-2026-5-30-pm-chst/article_9f536925-3b4b-4d2d-adeb-202dfeae79ba.html
+- Source (2026-07-17): JIC SitRep via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260718061507]: 'Saipan - Kagman Community Center (22)'. — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-july-17-2026-7-30-pm-chst/article_ac249fcf-5f5d-42b8-9a28-f408a389cd95.html
+- Source (2026-07-21): JIC SitRep #7 via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260722073516]: 'Saipan (Kagman): 18 occupants'. — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-7-july-21-2026---7-00-pm-chst/article_843bbe8f-6d72-47f6-a217-5f83490c62a0.html
+- Source (2026-07-24): JIC SitRep #8 via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260724164949]: 'Saipan: 15'. — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-8-july-24-6-30-pm-chst/article_514ddecb-9aa4-471b-b1f5-c79149de7936.html
+- Source (2026-07-28): JIC SitRep #9 via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260728202837]: 'All shelters on Saipan are closed.' — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-9-july-28-2026---6-30-pm-chst/article_1b2d9c7e-2d96-44a7-a9de-3d61c487e2fc.html
+- Source (2026-07-16): Marianas Variety, Office on Aging worker Cynthia Attao [MV live site captcha-blocked; read via web.archive.org 20260716004620]: Attao 'currently assists at the Kagman Community Center shelter'. — https://www.mvariety.com/news/local/elderly-disabled-residents-need-more-help-after-sinlaku-bavi-attao-says/article_55e8973b-5fe7-42b8-8ad4-c45535df79c1.html
+- Source (2026-06-26): Governor's Typhoon Recovery page, JIC Update 049, CUC Feeder 4: 'Kagman Road toward Kagman Market, Community Center and Fire Station'. — https://governor.cnmi.gov/typhoon-recovery/
+- Source (2026-05-04): JIC Update 024 (verbatim in docs/shelter-sources.md; URL re-checked 200): KCC is the Tier-2 long-term shelter (Sinlaku). — https://governor.cnmi.gov/wp-content/uploads/2026/05/May-4-SITREP-CNMI-JIC.pdf
+- Source (2026-10-07): Nominatim: no result for 'Kagman Community Center' — https://nominatim.openstreetmap.org/search?format=jsonv2&q=Kagman+Community+Center
+
+### Dandan Head Start (Dandan School campus)
+
+- Finding: Used only during Sinlaku (26 Apr-8 May 2026). Not in any Bavi or Choi-wan announcement. Head Start phone per NCES: (670) 288-8820.
+- Location: The campus now holds Dandan Middle School and Dandan Head Start/Early Head Start. NCES 2023-24 lists no Dandan Elementary, and the JIC 13 Jul 2026 PSS list names 'Dandan Middle School'; OSM still labels the campus 'Dandan Elementary School'. Use 'Dandan Middle School / Head Start campus, off Dandan Road (NMI-305, ~100 m)' in the landmark hint.
+- Coordinates: Pin (OSM way 638072014 centre) is inside the campus polygon; the NCES geocode for Dandan Head Start (15.138078,145.733237) is 61 m away in the same polygon.
+- Source (2026-04-26): JIC Update 013 (verbatim in docs/shelter-sources.md; URL re-checked 200): 'Dandan Head Start' on the Saipan shelter list. — https://governor.cnmi.gov/wp-content/uploads/2026/05/Apr-26-SITREP-CNMI-JIC.pdf
+- Source (2026-05-04): JIC Update 024 (verbatim in docs/shelter-sources.md; URL re-checked 200): 'three (3) transfers from Dandan School' to KCC. — https://governor.cnmi.gov/wp-content/uploads/2026/05/May-4-SITREP-CNMI-JIC.pdf
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): PSS list names 'Dandan Middle School'. — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-10-07): NCES EDGE school geocodes 2023-24: Dandan Head Start 15.138078,145.733237; Dandan Middle School 15.137171,145.733593; no Dandan Elementary listed. — https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_GEOCODE_PUBLICSCH_2324/MapServer/0/query?where=STATE%3D%27MP%27&outFields=*&returnGeometry=false&f=json
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): Dandan Head Start, phone (670) 288-8820. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200057
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): Dandan Middle School, phone (670) 664-5025. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200071
+
+### Garapan Elementary School
+
+- Finding: Not on the 2-3 Jul opening list; it appears as overflow on the 4 Jul 7 pm list. Absent from the 13 Jul roster. School office phone per NCES: (670) 664-3955.
+- Location: Described as a PSS 'secondary designated shelter site' (MV 5 Jul 2026).
+- Coordinates: Pin is 2 m from the OSM campus centre (way 251355141); the NCES geocode is in the same polygon.
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): 'Garapan Elementary School' available 7 pm 4 Jul. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): Marianas Variety citing JIC, counts as of 11 a.m. 5 Jul [MV live site captcha-blocked; read via web.archive.org 20260705192119]: 'Garapan Elementary School, a secondary designated shelter site, received 77 shelterees'. — https://www.mvariety.com/news/local/local-news-hundreds-evacuate-to-shelters-as-super-typhoon-bavi-nears-marianas/article_c4b8a1df-65a9-4fb3-a2cc-9fecd984cf10.html/
+- Source (2026-07-06): KPRG citing JIC, counts 6 Jul (quoted in docs/shelter-sources.md; URL re-checked 200): '84 at Garapan Elementary School'. — https://www.islapublic.org/news/2026-07-06/more-than-500-residents-take-shelter-as-bavi-pounds-the-marianas
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'Garapan Elementary School: 52' (7 Jul). — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-05-13): JIC Update 034 (verbatim in docs/shelter-sources.md; URL re-checked 200): Garapan ES 11 clients (Sinlaku). — https://governor.cnmi.gov/wp-content/uploads/2026/05/May-13-SITREP-CNMI-JIC.pdf
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 664-3955. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200058
+
+### Kagman Elementary School
+
+- Finding: Not in any Bavi or Choi-wan announcement. Building condition after Sinlaku is unverified. School office phone per NCES: (670) 664-3911.
+- Location: Sinlaku secondary shelter 'supporting the nearby Kagman High School cafeteria'. From the pin: Forbidden Island Road 119 m, Kagman Road 148 m.
+- Coordinates: Pin equals OSM node 1474821633 ('Kagaman elementary School'); the NCES geocode is 30 m away, inside the same campus polygon (way 257204517).
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco) quoting PSS Commissioner Camacho, Sinlaku secondary shelters [MV live site captcha-blocked; read via web.archive.org 20260413054743]: 'Kagman Elementary School has been designated as a secondary shelter' (13 Apr 2026). — https://www.mvariety.com/news/local/local-news-pss-activates-secondary-shelters-as-evacuee-numbers-rise-ahead-of-sinlaku/article_64ba73f3-8d9d-46bf-b006-37f52643c7d9.html/
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): KES summer-school start 'still pending'. — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-07-27): Marianas Variety, PSS Rota schools after Bavi [MV live site captcha-blocked; read via web.archive.org 20260727051240]: some KES buildings 'remain without power because of Sinlaku-related damage'. — https://www.mvariety.com/news/local/rota-schools-begin-recovery-after-bavi-pss-faces-new-fiscal-challenges/article_54254006-d9e5-40b2-9300-bc6eed8910d1.html
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 664-3911. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200081
+
+### Oleai Head Start
+
+- Finding: Used only during Sinlaku. Drop the '(Oleai Elementary School campus)' qualifier until the location is verified. Head Start phone per NCES: (670) 234-5692.
+- Location: NCES 2023-24 places Oleai Head Start at 15.164396,145.712353, on a separate building beside Oleai Street just outside the NW corner of the Oleai Elementary School grounds. The JIC used both 'Oleai Head Start' (26 Apr-8 May) and 'Oleai Elementary School' (13 May), so 'on the OES campus' is unverified.
+- Coordinates: Nominatim has no result. The current pin is the Oleai ES campus centre (OSM way 345114873). The NCES point lands 3 m from unnamed OSM building way 345114872, 151 m from the pin; plausible but unconfirmed.
+- Source (2026-04-26): JIC Update 013 (verbatim in docs/shelter-sources.md; URL re-checked 200): 'Oleai Head Start' on the Saipan list. — https://governor.cnmi.gov/wp-content/uploads/2026/05/Apr-26-SITREP-CNMI-JIC.pdf
+- Source (2026-05-13): JIC Update 034 (verbatim in docs/shelter-sources.md; URL re-checked 200): 'Oleai Elementary School' 15 clients. — https://governor.cnmi.gov/wp-content/uploads/2026/05/May-13-SITREP-CNMI-JIC.pdf
+- Source (2026-10-07): NCES EDGE school geocodes 2023-24: Oleai Head Start 15.164396,145.712353; Oleai ES 15.163681,145.713434. — https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_GEOCODE_PUBLICSCH_2324/MapServer/0/query?where=STATE%3D%27MP%27&outFields=*&returnGeometry=false&f=json
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): Oleai Head Start, phone (670) 234-5692. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200059
+- Source (2026-10-07): Nominatim: no result for 'Oleai Head Start, Saipan' — https://nominatim.openstreetmap.org/search?format=jsonv2&q=Oleai+Head+Start,+Saipan
+
+### Saipan Office on Aging (Man'amko Center)
+
+- Finding: SAFETY FLAG: the building lost its roof in Sinlaku and had not fully reopened as of 16 Jul 2026. It is not named in any Bavi or Choi-wan release; during Bavi the JIC sent residents needing medical support to Kagman Community Center. Do not show it as an open wheelchair/oxygen shelter without fresh confirmation. (670) 233-1321 is the Office on Aging main line, not a shelter hotline.
+- Location: 'the Manamko' Center in Garapan' (MV 16 Jul 2026); OSM building 'Manamko Center' on Husga Avenue (34 m); Red Cross address 'Kopa Di Oru St'.
+- Coordinates: Pin is inside the OSM building 'Manamko Center' (way 469267321).
+- Source (2026-04-12): HSEM Sinlaku Bulletin #2 (verbatim in docs/shelter-sources.md; URL re-checked 200): Office on Aging open for persons with disabilities and medical needs (wheelchair, oxygen). — https://governor.cnmi.gov/wp-content/uploads/2026/04/Typhoon-Sinlaku-Bulletin-2-Press-Release.pdf
+- Source (2026-04-13): Marianas Variety (B. Manabat), Sinlaku shelters [MV live site captcha-blocked; read via web.archive.org 20260413043842]: 23 sheltering at the Manamko' Center; Director's 'primarily for ...' statement. — https://www.mvariety.com/news/local/local-news-166-residents-in-shelters-as-sinlaku-approaches-marianas/article_31f79a8f-1b83-4737-a711-02c9a0558c81.html/
+- Source (2026-07-16): Marianas Variety, Office on Aging worker Cynthia Attao [MV live site captcha-blocked; read via web.archive.org 20260716004620]: 'the Manamko' Center in Garapan sustained significant damage during Sinlaku. "The roof flew away, and the windows were broken" ... has not fully reopened. After Sinlaku, several elderly residents were relocated to other shelters.' — https://www.mvariety.com/news/local/elderly-disabled-residents-need-more-help-after-sinlaku-bavi-attao-says/article_55e8973b-5fe7-42b8-8ad4-c45535df79c1.html
+- Source (2026-10-07): CNMI Aging and Disability Resource Center, service providers: Office on Aging (670) 233-1321. — https://cnmiadrc.org/service-providers/
+- Source (2026-04-17): American Red Cross open-shelter list in AKF guide (URL re-checked 200): 'ManAmko Center Office on Aging- Kopa Di Oru St'. — https://www.kidneyfund.org/sites/default/files/media/documents/drp-resource-guide-typhoon-sinlaku-4-17-2026.pdf
+
+### Saipan Southern High School
+
+- Finding: No 2026 shelter use found (Yutu 2018 only). School office phone per NCES: (670) 664-4002.
+- Coordinates: Pin is 2 m from the OSM campus centre (way 398670856); the NCES geocode is in the same polygon.
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): SSHS among PSS schools resuming summer classes 14 Jul 2026. — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 664-4002. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200078
+
+### Tanapag Middle School
+
+- Finding: No 2026 shelter use found. School office phone per NCES: (670) 664-3425.
+- Location: OSM labels the point 'Tanapag Elementary School'; NCES 2023-24 'Tanapag Middle School' is 38 m away. Chalan Pale Arnold (NMI-30) is 69 m away, and Tanapag Head Start (NCES 15.241887,145.758547) adjoins.
+- Coordinates: OSM node 1474820318; NCES geocode 15.241177,145.75841 is 38 m away.
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): Tanapag Middle School among PSS schools resuming summer classes 14 Jul. — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-07-27): Marianas Variety, PSS Rota schools after Bavi [MV live site captcha-blocked; read via web.archive.org 20260727051240]: some Tanapag MS buildings 'remain without power because of Sinlaku-related damage'. — https://www.mvariety.com/news/local/rota-schools-begin-recovery-after-bavi-pss-faces-new-fiscal-challenges/article_54254006-d9e5-40b2-9300-bc6eed8910d1.html
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 664-3425. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200062
+
+### Tanapag Youth Center
+
+- Finding: Used only during Sinlaku. Not in any Bavi or Choi-wan announcement.
+- Location: The pin (Red Cross plus code 6QR4+9RV) is 36 m from the street OSM names 'Ssg Wilgene Leito' and 84 m from Chalan Pale Arnold (NMI-30), next to Tanapag Middle School.
+- Coordinates: Nominatim has no result. Keep the Red Cross plus code 6QR4+9RV (decodes to 15.240987,145.757047).
+- Source (2026-04-17): American Red Cross open-shelter list in AKF guide (URL re-checked 200): 'Tanapag Youth Center- 6QR4+9RV, Tanapag ... (Open 24 Hours)'. — https://www.kidneyfund.org/sites/default/files/media/documents/drp-resource-guide-typhoon-sinlaku-4-17-2026.pdf
+- Source (2026-05-04): JIC Update 024 (verbatim in docs/shelter-sources.md; URL re-checked 200): 'Preparations at Tanapag Youth Center continue, focusing on water pump and shower installation.' — https://governor.cnmi.gov/wp-content/uploads/2026/05/May-4-SITREP-CNMI-JIC.pdf
+- Source (2026-10-07): Nominatim: no result for 'Tanapag Youth Center' — https://nominatim.openstreetmap.org/search?format=jsonv2&q=Tanapag+Youth+Center
+
+### Magdalena M. Hofschneider Tinian Head Start
+
+- Finding: Bavi: on the 2-3 Jul lists, then dropped (7 pm 4 Jul: Tinian ES only; 5 Jul: Tinian Middle and High School). Center phone per NCES: (670) 433-9253.
+- Location: On the Tinian Elementary School campus grounds, San Jose ('a new facility was constructed on the campus grounds of the Tinian Elementary School', 1 CMC 446 findings). Official name: 'Magdalena M. Hofschneider Tinian Head Start/Early Head Start Center'.
+- Coordinates: 1 CMC 446 puts the center on the Tinian ES campus; the corrected pin is the OSM Tinian Elementary School campus centre (way 1069009131). NCES 2023-24 geocodes Tinian Head Start to the same point as Tinian ES. The old pin (14.9707,145.6255, village centre) is 246 m away and outside the campus. Campus-level confidence only: the building itself is not mapped.
+- Source (2026-07-02): CNMI JIC Bavi shelter release 19:20 ChST (bit.ly/3QV7MyK): 'Tinian Head Start' on the Tinian list. — https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- Source (2026-07-03): CNMI JIC graphic 11:15 ChST 'UPDATED: Shelter Information for Rota' (image updatedshelterinfo.webp) [MV live site captcha-blocked; read via web.archive.org 20260704091310]: 'Tinian Head Start' listed again. — https://www.mvariety.com/news/local/local-news-updated-shelter-information-for-rota/article_ceca4090-96a3-41bd-bbf6-23125e9225fc.html/
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): not on the 7 pm 4 Jul list (Tinian ES only). — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-04-26): JIC Update 013 (verbatim in docs/shelter-sources.md; URL re-checked 200): 'Magdalena M. Hofschneider, Tinian Head Start'. — https://governor.cnmi.gov/wp-content/uploads/2026/05/Apr-26-SITREP-CNMI-JIC.pdf
+- Source (2022-06-30): 1 CMC 446 / PL 22-20 (codified PDF dated 21 Jul 2023): Head Start facility 'constructed on the campus grounds of the Tinian Elementary School'. — https://cnmilaw.gov/legacy/pdf/cmc_section/T1/446.pdf
+- Source (2026-10-07): NCES EDGE school geocodes 2023-24: Tinian Head Start and Tinian ES both geocoded to 14.971901,145.624291. — https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_GEOCODE_PUBLICSCH_2324/MapServer/0/query?where=STATE%3D%27MP%27&outFields=*&returnGeometry=false&f=json
+- Source (2026-10-07): PSS Head Start/Early Head Start page: 'Magdalena M Hofschneider Head Start Center, Tinian'; Tinian office (670) 287-9934. — https://www.cnmipss.org/head-startearly-head-start
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): Tinian Head Start, phone (670) 433-9253. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200076
+- Source (2026-10-07): Nominatim: no result for 'Tinian Head Start' — https://nominatim.openstreetmap.org/search?format=jsonv2&q=Tinian+Head+Start
+
+### Tinian Elementary School
+
+- Finding: Bavi counts: 58 (5 Jul), 61 including Tinian MS/HS (6 Jul), 23 (7 Jul), 16 (13 Jul), 11 (17 Jul); closed by 21 Jul. School office phone per NCES: (670) 433-9251.
+- Location: Shelter is in the cafeteria. The school 'sits on over five hectares of land in the heart of San Jose Village ... surrounded by the San Jose Church, the public library, a health clinic, a police and fire department, post office' (PSS). OSM: Canal Street (NMI-202) 120 m, 2nd Avenue (NMI-201) 203 m. Tinian Head Start shares the campus.
+- Coordinates: Pin is 14 m from the OSM campus centre (way 1069009131).
+- Source (2026-07-02): CNMI JIC Bavi shelter release 19:20 ChST (bit.ly/3QV7MyK): 'Tinian Elementary School' on the Tinian list. — https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): the only Tinian shelter listed at 7 pm 4 Jul. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): Marianas Variety citing JIC, counts as of 11 a.m. 5 Jul [MV live site captcha-blocked; read via web.archive.org 20260705192119]: '58 individuals sought refuge at Tinian Elementary School'. — https://www.mvariety.com/news/local/local-news-hundreds-evacuate-to-shelters-as-super-typhoon-bavi-nears-marianas/article_c4b8a1df-65a9-4fb3-a2cc-9fecd984cf10.html/
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'Tinian Elementary School: 23'; power restored to 'Tinian Elementary School shelter'. — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): Tinian Elementary School 16. — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-07-21): JIC SitRep #7 via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260722073516]: 'Tinian: Closed' (21 Jul). — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-7-july-21-2026---7-00-pm-chst/article_843bbe8f-6d72-47f6-a217-5f83490c62a0.html
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco) quoting PSS Commissioner Camacho, Sinlaku secondary shelters [MV live site captcha-blocked; read via web.archive.org 20260413054743]: 'exceeded its 40-person capacity, with 42 shelterees'. — https://www.mvariety.com/news/local/local-news-pss-activates-secondary-shelters-as-evacuee-numbers-rise-ahead-of-sinlaku/article_64ba73f3-8d9d-46bf-b006-37f52643c7d9.html/
+- Source (2026-10-07): PSS Tinian Elementary page: location description quoted in locationDetail. — https://www.cnmipss.org/tinian-elementary-school-0
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 433-9251. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200077
+
+### Tinian Middle School and Tinian High School
+
+- Finding: Used for Bavi from 5 Jul; absent from the 7 Jul roster. School office phone per NCES: (670) 237-3818.
+- Location: The Sinlaku overflow was 'Tinian High School's cafeteria' (PSS, MV 13 Apr 2026). NCES physical address 'Canal St. San Jose'; OSM: Cemetery Road 231 m. The JIC calls it 'Tinian Middle and High School'.
+- Coordinates: Pin is 14 m from the OSM campus centre (way 257200042); the NCES geocode is in the same polygon.
+- Source (2026-07-05): CNMI JIC Typhoon Condition I release 14:15 ChST (bit.ly/3R0jqbv): 'Tinian: Residents are advised to shelter at Tinian Middle and High School.' — https://drive.google.com/file/d/1bDu4dhb-tFDLtyyq7LescX7C3wTYl3PC/view
+- Source (2026-07-06): KPRG citing JIC, counts 6 Jul (quoted in docs/shelter-sources.md; URL re-checked 200): '61 residents took shelter at Tinian Elementary School and Tinian Middle/High School'. — https://www.islapublic.org/news/2026-07-06/more-than-500-residents-take-shelter-as-bavi-pounds-the-marianas
+- Source (2026-04-13): Marianas Variety (U. T. Sabuco) quoting PSS Commissioner Camacho, Sinlaku secondary shelters [MV live site captcha-blocked; read via web.archive.org 20260413054743]: 'Tinian High School's cafeteria has been designated as a secondary shelter'. — https://www.mvariety.com/news/local/local-news-pss-activates-secondary-shelters-as-evacuee-numbers-rise-ahead-of-sinlaku/article_64ba73f3-8d9d-46bf-b006-37f52643c7d9.html/
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): physical 'Canal St. San Jose', phone (670) 237-3818. — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200065
+
+### Dr. Rita Hocog Inos Jr./Sr. High School
+
+- Finding: SAFETY: the current pin sends people about 1.2 km to the wrong building. Bavi counts: 25 (6 Jul), 13 (7 Jul), 22 (13 Jul), 26 (17 Jul); closed by 5 Aug 2026. School office phone per NCES: (670) 532-9502.
+- Location: Shelter is the cafeteria; 'Building D houses showers, bathrooms and other facilities supporting shelter operations'. The campus is 'Songsong Village area, District 4' (Rota Mayor), the former Rota Junior High campus off Pali'E Road (NMI-100, 90 m). It is NOT the former Rota High School building on the San Francisco de Borja Highway, which is now the DLNR office building.
+- Coordinates: Red Cross address '44RW 733, Songsong' read as plus code 7R6744RW+733 decodes to 14.140637,145.145172; the NCES 2023-24 geocode (14.140873,145.14524) is 27 m away. The old pin (14.13504,145.13593) is OSM way 236360243, tagged 'Formerly Rota High School. Now occupied by CNMI Government Agencies'; OPM lists that building as the 'DLNR Office Building (Former Rota High School)'. The new pin is 46 m from GNIS node 358021584 'Rota Elementary School', the old elementary/junior-high campus.
+- Source (2026-07-02): CNMI JIC Bavi shelter release 19:20 ChST (bit.ly/3QV7MyK): 'Dr. Rita Hocog Inos Jr./Sr. High School' is the Rota shelter. — https://drive.google.com/file/d/1Zlu6BJ0q9cQwcQs2VDPtKB8NpjEbmdVT/view
+- Source (2026-07-04): Office of the Mayor of Rota notice 'ROTA SHELTERS: UPDATE' (image rotashelters.webp) [MV live site captcha-blocked; read via web.archive.org 20260705031752]: 'DR. RITA H. INOS JR. SR. HIGHSCHOOL, SONGSONG VILLAGE AREA, DISTRICT 4', open 3:00 pm 4 Jul. — https://www.mvariety.com/news/local/local-news-rota-shelters-update/article_b7d0aefc-5be6-4678-89cd-1203c6558477.html/
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): listed available 7 pm 4 Jul. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): CNMI JIC Typhoon Condition I release 14:15 ChST (bit.ly/3R0jqbv): 'remain open for residents'. — https://drive.google.com/file/d/1bDu4dhb-tFDLtyyq7LescX7C3wTYl3PC/view
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'Rita H. Inos Jr.-Sr. High School-Rota: 13'. — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): 22 occupants (13 Jul). — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-08-05): JIC SitRep via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260806104931]: 'Dr. Rita Hocog Inos Jr./Sr. High School and the Rota Aging Center are closed.' — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-as-of-wednesday-aug-5/article_f05095ac-ff26-4d45-8ce1-789f22b0c7f7.html
+- Source (2026-07-27): Marianas Variety, PSS Rota schools after Bavi [MV live site captcha-blocked; read via web.archive.org 20260727051240]: cafeteria is the shelter; Building D; FEMA restored power. — https://www.mvariety.com/news/local/rota-schools-begin-recovery-after-bavi-pss-faces-new-fiscal-challenges/article_54254006-d9e5-40b2-9300-bc6eed8910d1.html
+- Source (2026-04-17): American Red Cross open-shelter list in AKF guide (URL re-checked 200): 'Dr Rita Hocog Inos Jr Sr High School- 44RW 733, Songsong'. — https://www.kidneyfund.org/sites/default/files/media/documents/drp-resource-guide-typhoon-sinlaku-4-17-2026.pdf
+- Source (2026-10-07): NCES EDGE school geocodes 2023-24: RHI geocode 14.140873,145.14524. — https://nces.ed.gov/opengis/rest/services/K12_School_Locations/EDGE_GEOCODE_PUBLICSCH_2324/MapServer/0/query?where=STATE%3D%27MP%27&outFields=*&returnGeometry=false&f=json
+- Source (2026-10-07): CNMI Office of Personnel Management office list: 'Department of Lands & Natural Resources Office Building (Former Rota High School) District #4, Songsong Village'. — https://opm.cnmi.gov/
+- Source (2026-09-29): Wikipedia 'Rota' (rev. 2026-09-29; passage marked [citation needed]; corroborative only): 'RHIJSHS is located on the former junior high school campus in Songsong Village'. — https://en.wikipedia.org/wiki/Rota,_Northern_Mariana_Islands
+- Source (2026-10-07): OpenStreetMap via Overpass API (2026-10-07): way 236360243 operator tag 'Formerly Rota High School. Now occupied by CNMI Government Agencies'. — https://www.openstreetmap.org/
+- Source (2026-10-07): NCES CCD school detail (2025-2026 data): phone (670) 532-9502; physical address given as 'Sinapalo' (conflicts with every other source). — https://nces.ed.gov/ccd/schoolsearch/school_detail.asp?ID=690000200060
+
+### Sinapalo Office on Aging (Rota Aging Center)
+
+- Finding: Releases use several names: 'Rota Office of Aging', 'Office on Aging Center', 'Aging Office', 'DCCA Rota Aging', 'Rota Aging Center'. Bavi counts: 29 (6 Jul), 35 (7 Jul), 72 (13 Jul), 67 (17 Jul); closed by 5 Aug 2026. Rota transport: Mayor (670) 532-9451/2, COTA (670) 236-2682.
+- Location: 'OFFICE ON AGING CENTER - ROTA, SINAPALO I AREA' (Office of the Mayor of Rota, 4 Jul 2026).
+- Coordinates: Nominatim has no result, and OSM has no Office on Aging feature in Sinapalo. Keep the Sinapalo place node; the source says 'Sinapalo I area'.
+- Source (2026-07-03): CNMI JIC graphic 11:15 ChST 'UPDATED: Shelter Information for Rota' (image updatedshelterinfo.webp) [MV live site captcha-blocked; read via web.archive.org 20260704091310]: 'Rota Office of Aging' opens at Typhoon Condition II. — https://www.mvariety.com/news/local/local-news-updated-shelter-information-for-rota/article_ceca4090-96a3-41bd-bbf6-23125e9225fc.html/
+- Source (2026-07-04): Office of the Mayor of Rota notice 'ROTA SHELTERS: UPDATE' (image rotashelters.webp) [MV live site captcha-blocked; read via web.archive.org 20260705031752]: 'OFFICE ON AGING CENTER - ROTA, SINAPALO I AREA'; 'OFFICE ON AGING CENTER - ROTA (670)532-2656'. — https://www.mvariety.com/news/local/local-news-rota-shelters-update/article_b7d0aefc-5be6-4678-89cd-1203c6558477.html/
+- Source (2026-07-04): CNMI JIC release 20:30 ChST, 'available shelters as of 7:00pm, July 4' (bit.ly/4gTeDmK): 'Office on Aging Center'; Rota transport lines include (670) 532-2656. — https://drive.google.com/file/d/1_RjzxNenqiyAuBahIIX58qJImy6eA1gD/view
+- Source (2026-07-05): CNMI JIC Typhoon Condition I release 14:15 ChST (bit.ly/3R0jqbv): 'The Aging Office ... remain open'. — https://drive.google.com/file/d/1bDu4dhb-tFDLtyyq7LescX7C3wTYl3PC/view
+- Source (2026-07-08): Marianas Variety: JIC shelter roster as of Tue 7 Jul + CUC power [MV live site captcha-blocked; read via web.archive.org 20260708032305]: 'DCCA Rota Aging: 35'. — https://www.mvariety.com/news/local/local-news-saipan-spared-worst-of-bavis-impact-as-cuc-moves-to-restore-power/article_4538c8d9-e6ee-4e16-bb02-44acd40f9c87.html/
+- Source (2026-07-13): JIC Bavi Situational Report #4, shelter update as of 1600 ChST (bit.ly/4vpQWGg): Rota Aging Center 72 (13 Jul). — https://drive.google.com/file/d/1kgSrEhdHpFLS4wVemWXaBsOgcx-NkcfJ/view
+- Source (2026-08-05): JIC SitRep via Marianas Variety [MV live site captcha-blocked; read via web.archive.org 20260806104931]: Rota Aging Center closed. — https://www.mvariety.com/news/local/super-typhoon-bavi-situational-report-as-of-wednesday-aug-5/article_f05095ac-ff26-4d45-8ce1-789f22b0c7f7.html
+- Source (2026-04-12): HSEM Sinlaku Bulletin #2 (verbatim in docs/shelter-sources.md; URL re-checked 200): Sinlaku primary Rota shelter; inquiries (670) 532-2656. — https://governor.cnmi.gov/wp-content/uploads/2026/04/Typhoon-Sinlaku-Bulletin-2-Press-Release.pdf
+- Source (2026-10-07): Nominatim: no result for 'Office on Aging, Rota' — https://nominatim.openstreetmap.org/search?format=jsonv2&q=Office+on+Aging,+Rota
+
+Not added (not walk-in public shelters): the Koblerville Youth Center (designated only for registered sex offenders, HSEM Bulletin #3), hotel non-congregate sheltering for displaced households (Crowne Plaza, Finasisu Terraces, Western Lodge; JIC May 2026), and CHCC's arrangement for expectant mothers at 36+ weeks (call (670) 234-8950; on Tinian and Rota, the health centers), which the app mentions under Medical support.

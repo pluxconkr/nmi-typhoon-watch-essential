@@ -4,6 +4,7 @@
  */
 import bundledFaq from '@/assets/data/faq.json';
 import bundledShelters from '@/assets/data/shelters.json';
+import bundledSupplies from '@/assets/data/supplies.json';
 import bundledWaterPoints from '@/assets/data/water-points.json';
 import { RULES_VERSION, sanitizeHousehold } from '@/domain/rules';
 import { pruneAlerts } from '@/domain/nws';
@@ -21,6 +22,7 @@ import type {
   Shelter,
   StorageNotice,
   StoredAlert,
+  SupplyStore,
   WaterPoint,
   WindForecast,
 } from '@/domain/types';
@@ -228,6 +230,10 @@ export const shelterRepo = {
   bundledVersion(): string {
     return bundledShelters.version;
   },
+  /** The official announcement that "current" refers to, e.g. { storm: 'Super Typhoon Bavi', dates: '2-5 Jul 2026' }. */
+  latestAnnouncement(): { storm: string; dates: string } {
+    return bundledShelters.latestAnnouncement;
+  },
   saveDownloaded(payload: { shelters: Shelter[]; version: string }): number {
     return files.writeJson(SHELTERS_FILE, payload);
   },
@@ -242,6 +248,16 @@ export const shelterRepo = {
 export const waterPointRepo = {
   get(): { points: WaterPoint[]; lastVerified: string } {
     return { points: bundledWaterPoints.points as WaterPoint[], lastVerified: bundledWaterPoints.lastVerified };
+  },
+};
+
+/** Supply stores ship with the app (verified research, see docs/supply-sources.md); there is no remote feed. */
+export const supplyRepo = {
+  get(): SupplyStore[] {
+    return bundledSupplies.stores as SupplyStore[];
+  },
+  verifiedOn(): string | null {
+    return bundledSupplies.verifiedOn;
   },
 };
 
@@ -285,7 +301,7 @@ export const cacheMetaRepo = {
 
 // ---------- Settings ----------
 
-export const DEFAULT_SETTINGS: Settings = { demoScenario: 'live', simulateOffline: false, notificationsEnabled: true };
+export const DEFAULT_SETTINGS: Settings = { demoScenario: 'live', simulateOffline: false, notificationsEnabled: true, demoPosition: null, pollInterval: 'auto' };
 
 export const settingsRepo = {
   get(): Settings {

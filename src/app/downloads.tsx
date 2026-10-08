@@ -2,6 +2,7 @@
  * S-08 Downloads · offline data manager. Makes "this app works offline" a claim you can verify:
  * what is saved, how big, and when. Also hosts the demo/testing controls (clearly labelled).
  */
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, Text } from 'react-native';
 
@@ -12,13 +13,11 @@ import tinian from '@/assets/data/tinian-coastline.json';
 import { files } from '@/data/files';
 import { resetAllData, shelterRepo } from '@/data/repos';
 import { formatChstStamp, isStale, relativeAgo } from '@/domain/time';
-import type { DemoScenario } from '@/domain/types';
-import { applyDemoScenario } from '@/services/demo';
 import { refreshAll, retrySummaries, type RefreshResult } from '@/services/refresh';
 import { actions, isOfflineNow, useAppState } from '@/store/appStore';
 import { useClock } from '@/store/derived';
 import type { IconName } from '@/ui/icons';
-import { Button, Callout, Cell, Group, ProgressBar, ProgressRing, SectionFooter, SectionHeader, Segmented, Subhead, Toggle } from '@/ui/primitives';
+import { Button, Callout, Cell, Group, ProgressBar, ProgressRing, SectionFooter, SectionHeader, Subhead } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { colors, tabular, type } from '@/ui/theme';
 
@@ -27,12 +26,12 @@ const kb = (bytes: number) =>
 const DROPPED_LABEL = { forecast: 'the wind forecast', 'alert-history': 'older notices (the newest 10 are kept)' } as const;
 
 export default function DownloadsScreen() {
+  const router = useRouter();
   const cacheMeta = useAppState((s) => s.cacheMeta);
   const shelters = useAppState((s) => s.shelters);
   const shelterSource = useAppState((s) => s.shelterSource);
   const alerts = useAppState((s) => s.alerts);
   const forecast = useAppState((s) => s.forecast);
-  const settings = useAppState((s) => s.settings);
   const offline = useAppState((s) => isOfflineNow(s));
   const refreshing = useAppState((s) => s.refreshing);
   const progress = useAppState((s) => s.refreshProgress);
@@ -141,34 +140,9 @@ export default function DownloadsScreen() {
       </Group>
       <SectionFooter>If storage runs out, the forecast and alert history are dropped first. The shelter list, map and FAQ are kept to the end. Total footprint is under 1 MB.{freeText ? ` ${freeText[0].toUpperCase()}${freeText.slice(1)}.` : ''}</SectionFooter>
 
-      <SectionHeader>Notifications</SectionHeader>
       <Group>
-        <Toggle icon="bell" label="Notify me about new NWS alerts" value={settings.notificationsEnabled} onChange={(v) => actions.patchSettings({ notificationsEnabled: v })} hint="Local notifications; sound only for Extreme or Severe" last />
+        <Cell icon="settings" title="Settings" subtitle="Alert checks, notifications, demo & testing" accessory="chevron" onPress={() => router.push('/settings')} last />
       </Group>
-
-      <SectionHeader>Demo & testing</SectionHeader>
-      <Group>
-        <Cell
-          icon="flask"
-          title="Scenario"
-          subtitle="Real NWS Tiyan GU text from Super Typhoon Sinlaku (April 2026), times shifted to now"
-          trailing={
-            <Segmented<DemoScenario>
-              label="Demo scenario"
-              options={[
-                { value: 'live', label: 'Live' },
-                { value: 'before', label: 'Before' },
-                { value: 'during', label: 'During' },
-                { value: 'after', label: 'After' },
-              ]}
-              value={settings.demoScenario}
-              onChange={(v) => applyDemoScenario(v)}
-            />
-          }
-        />
-        <Toggle icon="offline" label="Simulate no signal" value={settings.simulateOffline} onChange={(v) => actions.patchSettings({ simulateOffline: v })} hint="Shows the OFFLINE banner and blocks network calls" last />
-      </Group>
-      <SectionFooter>Demo notices are labelled everywhere they appear. For the real test use airplane mode: quit the app, turn airplane mode on, relaunch. Every tab must still open.</SectionFooter>
 
       <SectionHeader>About the data</SectionHeader>
       <Group padded>

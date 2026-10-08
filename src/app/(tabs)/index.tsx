@@ -66,7 +66,8 @@ export default function AlertScreen() {
       <SectionHeader>More</SectionHeader>
       <Group>
         <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone · readable offline`} accessory="chevron" onPress={() => router.push('/history')} />
-        <Cell icon="download" iconColor={colors.green} title="Offline data" subtitle={offlineDataSub} value="Ready" valueColor={colors.green} accessory="chevron" onPress={() => router.push('/downloads')} last />
+        <Cell icon="download" iconColor={colors.green} title="Offline data" subtitle={offlineDataSub} value="Ready" valueColor={colors.green} accessory="chevron" onPress={() => router.push('/downloads')} />
+        <Cell icon="settings" title="Settings" subtitle="Alert checks, notifications, demo & testing" accessory="chevron" onPress={() => router.push('/settings')} last />
       </Group>
     </>
   );
@@ -96,7 +97,8 @@ export default function AlertScreen() {
         <EmergencyNumbers />
         <SectionHeader>More</SectionHeader>
         <Group>
-          <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone`} accessory="chevron" onPress={() => router.push('/history')} last />
+          <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone`} accessory="chevron" onPress={() => router.push('/history')} />
+          <Cell icon="settings" title="Settings" subtitle="Alert checks, notifications, demo & testing" accessory="chevron" onPress={() => router.push('/settings')} last />
         </Group>
       </Screen>
     );
@@ -125,7 +127,8 @@ export default function AlertScreen() {
         <EmergencyNumbers />
         <SectionHeader>More</SectionHeader>
         <Group>
-          <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone`} accessory="chevron" onPress={() => router.push('/history')} last />
+          <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone`} accessory="chevron" onPress={() => router.push('/history')} />
+          <Cell icon="settings" title="Settings" subtitle="Alert checks, notifications, demo & testing" accessory="chevron" onPress={() => router.push('/settings')} last />
         </Group>
       </Screen>
     );
@@ -199,7 +202,8 @@ export default function AlertScreen() {
         ) : (
           <Cell icon="history" iconColor={colors.ink2} title="No notices yet" subtitle="When the phone is online the app checks NWS for CNMI alerts and keeps every one here, readable offline." />
         )}
-        <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone · readable offline`} accessory="chevron" onPress={() => router.push('/history')} last />
+        <Cell icon="history" title="Past notices" subtitle={`${alerts.length} saved on this phone · readable offline`} accessory="chevron" onPress={() => router.push('/history')} />
+        <Cell icon="settings" title="Settings" subtitle="Alert checks, notifications, demo & testing" accessory="chevron" onPress={() => router.push('/settings')} last />
       </Group>
       <Button title={refreshing ? 'Checking NWS…' : offline ? 'No signal — will check automatically' : 'Check NWS now'} variant="secondary" disabled={offline || refreshing} onPress={() => void refreshAll()} style={{ marginTop: 6 }} />
       <SectionFooter style={{ textAlign: 'center' }}>Alerts: NWS Tiyan GU (api.weather.gov) · Wind: Weather data by Open-Meteo.com</SectionFooter>

@@ -6,12 +6,13 @@ import faq from '@/assets/data/faq.json';
 import rota from '@/assets/data/rota-coastline.json';
 import saipan from '@/assets/data/saipan-coastline.json';
 import shelters from '@/assets/data/shelters.json';
+import supplies from '@/assets/data/supplies.json';
 import villages from '@/assets/data/saipan-villages.json';
 import tinian from '@/assets/data/tinian-coastline.json';
 import otherVillages from '@/assets/data/tinian-rota-villages.json';
 import water from '@/assets/data/water-points.json';
 import { ISLAND_BBOX, SAIPAN_BBOX, islandAt } from '@/domain/geo';
-import type { FaqEntry, Shelter, WaterPoint } from '@/domain/types';
+import type { FaqEntry, Shelter, SupplyStore, WaterPoint } from '@/domain/types';
 
 const inBox = (lat: number, lng: number, box: { minLat: number; maxLat: number; minLng: number; maxLng: number }) =>
   lat >= box.minLat && lat <= box.maxLat && lng >= box.minLng && lng <= box.maxLng;
@@ -44,6 +45,28 @@ describe('bundled shelters', () => {
       expect(inBox(s.lat, s.lng, SAIPAN_BBOX)).toBe(s.island === 'saipan');
       expect(islandAt(s)).toBe(s.island);
     }
+  });
+
+  test('re-verified 7 Oct 2026: 10 on the latest list (Bavi), 7 from earlier storms, 4 named for medical support', () => {
+    expect(list.filter((s) => s.designation === 'current')).toHaveLength(10);
+    expect(list.filter((s) => s.designation === 'past')).toHaveLength(7);
+    const medical = list.filter((s) => s.medicalSupport);
+    expect(medical.map((s) => s.shelterId).sort()).toEqual(['dr-rita-hocog-inos-jr-sr-high-school', 'kagman-community-center', 'rota-office-on-aging-sinapalo', 'tinian-middle-high-school']);
+    for (const s of medical) expect(s.designation).toBe('current');
+    // HSEM primaries are current.
+    for (const id of ['marianas-high-school', 'koblerville-elementary-school', 'kagman-high-school', 'tinian-elementary-school', 'rota-office-on-aging-sinapalo']) {
+      expect(list.find((s) => s.shelterId === id)!.designation).toBe('current');
+    }
+    // The storm-damaged Man'amko' Center is flagged and never "current".
+    const ooa = list.find((s) => s.shelterId === 'saipan-office-on-aging')!;
+    expect(ooa.designation).toBe('past');
+    expect(ooa.caution).toMatch(/roof and windows/);
+    // Rota high school pin corrected away from the DLNR building (old pin 14.13504,145.13593).
+    const rhi = list.find((s) => s.shelterId === 'dr-rita-hocog-inos-jr-sr-high-school')!;
+    expect(Math.abs(rhi.lat - 14.14064)).toBeLessThan(1e-4);
+    expect(Math.abs(rhi.lng - 145.14517)).toBeLessThan(1e-4);
+    expect(rhi.landmarkHint).toMatch(/NOT the old Rota High School/);
+    for (const s of list) expect(s.lastVerified).toBe('2026-10-07');
   });
 
   test('no shelter claims to accept pets (CNMI policy: certified service animals only)', () => {
@@ -95,6 +118,26 @@ describe('bundled water points, FAQ, geodata, demo alerts', () => {
     for (const a of demo.alerts) {
       expect(a.product_id).toMatch(/PGUM/);
       expect(a.description).toMatch(/Sinlaku/i);
+    }
+  });
+});
+
+describe('bundled supply stores', () => {
+  const stores = supplies.stores as SupplyStore[];
+
+  test('every store is on the island it claims, cites a source and was checked on a real date', () => {
+    const ids = new Set<string>();
+    for (const st of stores) {
+      expect(ids.has(st.id)).toBe(false);
+      ids.add(st.id);
+      expect(['grocery', 'convenience', 'pharmacy', 'hardware', 'fuel']).toContain(st.category);
+      expect(['operating', 'unknown']).toContain(st.status);
+      expect(['high', 'medium', 'low']).toContain(st.coordConfidence);
+      expect(islandAt(st)).toBe(st.island);
+      expect(st.sources.length).toBeGreaterThan(0);
+      for (const src of st.sources) expect(src.url).toMatch(/^https?:\/\//);
+      expect(/^\d{4}-\d{2}-\d{2}$/.test(st.lastVerified)).toBe(true);
+      expect(st.statusEvidence.length).toBeGreaterThan(10);
     }
   });
 });

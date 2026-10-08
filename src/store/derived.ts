@@ -4,11 +4,16 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 
+import { roadGraph } from '@/data/roads';
+import { islandAt, type IslandId } from '@/domain/geo';
 import { derivePhase, type PhaseState } from '@/domain/phase';
+import type { TravelMode } from '@/domain/roads';
+import { reachByRoad, type Reach } from '@/domain/routing';
 import { computeChecklist } from '@/domain/rules';
 import { hoursBetween } from '@/domain/time';
 import type { PrepWindow } from '@/domain/types';
 import { windowFor } from '@/domain/windows';
+import type { Place } from '@/services/destinations';
 
 import { useAppState } from './appStore';
 
@@ -38,4 +43,25 @@ export function useChecklist() {
   const state = useAppState((s) => s.checklist);
   const items = useMemo(() => computeChecklist(household), [household]);
   return { household, items, state };
+}
+
+/** Distances are recomputed when you move about this far (degrees; ≈ 55 m). */
+const REACH_GRID_DEG = 0.0005;
+
+/**
+ * Road distance and travel time from your position to each place on the island you are on (one offline search).
+ * Empty when there is no position or you are not on Saipan, Tinian or Rota.
+ */
+export function useRoadReach(places: Place[], mode: TravelMode = 'drive'): { island: IslandId | null; reach: Map<string, Reach> } {
+  const location = useAppState((s) => s.location);
+  const lat = location ? Math.round(location.lat / REACH_GRID_DEG) * REACH_GRID_DEG : null;
+  const lng = location ? Math.round(location.lng / REACH_GRID_DEG) * REACH_GRID_DEG : null;
+  return useMemo(() => {
+    if (lat === null || lng === null) return { island: null, reach: new Map() };
+    const island = islandAt({ lat, lng });
+    if (!island) return { island: null, reach: new Map() };
+    const onIsland = places.filter((p) => p.island === island);
+    const reach = reachByRoad(roadGraph(island), { lat, lng }, onIsland, mode);
+    return { island, reach: new Map(reach.map((r) => [r.id, r])) };
+  }, [lat, lng, places, mode]);
 }

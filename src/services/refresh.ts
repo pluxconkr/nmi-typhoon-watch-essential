@@ -4,7 +4,9 @@
  */
 import { alertRepo, cacheMetaRepo, dropLowPriority, isLowOnSpace, reportStorageNotice, shelterRepo } from '@/data/repos';
 import { mergeAlerts } from '@/domain/nws';
-import { nowIso } from '@/domain/time';
+import { derivePhase } from '@/domain/phase';
+import { checkDue, pollMinutes } from '@/domain/polling';
+import { nowIso, toEpoch } from '@/domain/time';
 import type { AssetKey, Shelter, StoredAlert } from '@/domain/types';
 import { actions, getState, isOfflineNow } from '@/store/appStore';
 
@@ -129,10 +131,27 @@ export function refreshAll(): Promise<RefreshResult> {
   return inFlight;
 }
 
-/** Foreground policy: refresh if the last attempt is older than `minAgeMs`. */
-export function refreshIfStale(minAgeMs = 15 * 60_000): Promise<RefreshResult | null> {
-  const last = getState().lastRefreshAt;
-  if (last && Date.now() - last < minAgeMs) return Promise.resolve(null);
+/** Minutes between NWS checks right now: the Settings choice, or automatic (hourly; 10 min during a storm alert). */
+export function currentPollMinutes(now: number = Date.now()): number {
+  const s = getState();
+  return pollMinutes(s.settings.pollInterval, derivePhase(s.alerts, now, s.forecast).phase);
+}
+
+/** Epoch ms of the last successful NWS check (persisted), or null. */
+export function lastAlertCheckAt(): number | null {
+  const at = getState().cacheMeta.alerts?.fetchedAt;
+  const ms = at ? toEpoch(at) : NaN;
+  return Number.isFinite(ms) ? ms : null;
+}
+
+/** After a failed or skipped attempt, wait this long before trying again. */
+const RETRY_AFTER_MS = 2 * 60_000;
+
+/** Check NWS when the polling interval has passed since the last successful check. */
+export function refreshIfDue(now: number = Date.now()): Promise<RefreshResult | null> {
+  if (isOfflineNow() || !checkDue(lastAlertCheckAt(), currentPollMinutes(now), now)) return Promise.resolve(null);
+  const lastAttempt = getState().lastRefreshAt;
+  if (lastAttempt && now - lastAttempt < RETRY_AFTER_MS) return Promise.resolve(null);
   return refreshAll();
 }
 
