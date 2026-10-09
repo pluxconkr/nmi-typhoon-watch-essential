@@ -1,10 +1,11 @@
 /**
- * Alert-tab widgets: countdown, preparation-window timeline, task rows, plain summary.
+ * Alert widgets: countdown, preparation-window timeline, task rows, the essentials and the plain summary.
  * Reference points: Reminders list rows, Clock timer numerals.
  */
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import type { Essentials } from '@/domain/essentials';
 import { formatChstShort, formatChstStamp, formatCountdown } from '@/domain/time';
 import type { PrepWindow, TaskItem } from '@/domain/types';
 import { WINDOWS, WINDOW_LABEL } from '@/domain/windows';
@@ -85,6 +86,44 @@ export function TaskRow({ task, checked, onChange, last }: { task: TaskItem; che
   );
 }
 
+/**
+ * What an alert means, when, where and what to do — big, plain and short, for any reader. Label above value
+ * (not beside it) so it still reads at 200% text size.
+ */
+export function AlertEssentials({ e }: { e: Essentials }) {
+  const color = e.tone === 'danger' ? colors.red : e.tone === 'watch' ? colors.amber : colors.ink;
+  return (
+    <View>
+      <Text style={[styles.essHeadline, { color }]} accessibilityRole="header">
+        {e.headline}
+      </Text>
+      <Text style={styles.essDetail}>{e.detail}</Text>
+      {e.when ? <Fact label={e.when.label} value={e.when.text} /> : null}
+      {e.where ? <Fact label="Where" value={e.where} /> : null}
+      {e.steps.length ? (
+        <View style={styles.essBlock}>
+          <Text style={styles.essLabel}>What to do</Text>
+          {e.steps.map((step, i) => (
+            <View key={step} style={styles.essStep} accessible accessibilityLabel={`Step ${i + 1}: ${step}`}>
+              <Text style={styles.essStepNumber}>{i + 1}.</Text>
+              <Text style={styles.essValueText}>{step}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.essBlock} accessible accessibilityLabel={`${label}: ${value}`}>
+      <Text style={styles.essLabel}>{label}</Text>
+      <Text style={[styles.essValueText, styles.essValue]}>{value}</Text>
+    </View>
+  );
+}
+
 export function PlainSummary({ summary, status, generatedAt, isDemo }: { summary: string | null; status: 'ok' | 'unavailable' | 'pending'; generatedAt: string | null; isDemo?: boolean }) {
   return (
     <View>
@@ -113,4 +152,12 @@ const styles = StyleSheet.create({
   taskSeparator: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   taskDone: { color: colors.ink2, textDecorationLine: 'line-through' },
   plainQuote: { ...type.title3, marginTop: 6 },
+  essHeadline: { ...type.title1 },
+  essDetail: { fontSize: 20, lineHeight: 27, color: colors.ink, marginTop: 6 },
+  essBlock: { marginTop: 16, paddingTop: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
+  essLabel: { fontSize: 16, lineHeight: 21, fontWeight: '600', color: colors.ink2 },
+  essValue: { fontWeight: '600', marginTop: 2 },
+  essValueText: { flex: 1, fontSize: 21, lineHeight: 28, color: colors.ink },
+  essStep: { flexDirection: 'row', gap: 8, marginTop: 8 },
+  essStepNumber: { fontSize: 21, lineHeight: 28, fontWeight: '700', color: colors.ink, minWidth: 24 },
 });

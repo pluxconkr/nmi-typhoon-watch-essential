@@ -67,6 +67,31 @@ export function formatChstShort(input: string | number | null | undefined): stri
   return `${p.weekday} ${pad2(p.hour)}:${pad2(p.minute)} ${CHST_LABEL}`;
 }
 
+const FULL_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const FULL_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const chstDay = (ms: number) => Math.floor((ms + CHST_OFFSET_MS) / 86_400_000);
+
+/**
+ * A time the way people say it, for the plainest screens (ChST): "Today, 3:00 PM", "Tomorrow, 9:30 AM",
+ * "Monday 13 April, 3:00 PM". With `relative`, a time in the next 3 days also says "(in about 18 hours)".
+ */
+export function formatChstFriendly(input: string | number | null | undefined, now: number = Date.now(), opts: { relative?: boolean } = {}): string {
+  const ms = toEpoch(input);
+  if (!Number.isFinite(ms)) return '—';
+  const d = new Date(ms + CHST_OFFSET_MS);
+  const days = chstDay(ms) - chstDay(now);
+  const day = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : days === -1 ? 'Yesterday' : `${FULL_DAYS[d.getUTCDay()]} ${d.getUTCDate()} ${FULL_MONTHS[d.getUTCMonth()]}`;
+  const h = d.getUTCHours();
+  const time = `${h % 12 === 0 ? 12 : h % 12}:${pad2(d.getUTCMinutes())} ${h < 12 ? 'AM' : 'PM'}`;
+  let rel = '';
+  if (opts.relative && ms > now && ms - now < 3 * 86_400_000) {
+    const min = Math.max(1, Math.round((ms - now) / 60_000));
+    const hours = Math.round(min / 60);
+    rel = min < 60 ? ` (in about ${min} minute${min === 1 ? '' : 's'})` : ` (in about ${hours} hour${hours === 1 ? '' : 's'})`;
+  }
+  return `${day}, ${time}${rel}`;
+}
+
 /** Relative age: "just now", "5 min ago", "3 hours ago", "2 days ago". */
 export function relativeAgo(input: string | number | null | undefined, now: number = Date.now()): string {
   const ms = toEpoch(input);

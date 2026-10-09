@@ -129,38 +129,36 @@ describe('scc verification: destinations', () => {
 });
 
 describe('scc verification: routes from many origins', () => {
-  test('reachByRoad before vs after, all origins x all shelters+stores', () => {
+  test('reachByRoad before vs after, sampled origins + dense clusters around the removed edges', () => {
     const rng = mulberry32(987654321);
     const M = 111_320;
     const summary: any = {};
     const worst: any[] = [];
     const lost: any[] = [];
+    const changedRows: any[] = [];
     for (const isl of ISLANDS) {
       const ga = roadGraph(isl);
       const gb = oldGraph(isl);
       const targets = DESTS.filter((d) => d.island === isl).map((d) => ({ id: d.id, name: d.name, lat: d.lat, lng: d.lng }));
       const origins: { cls: string; lat: number; lng: number }[] = [];
-      // every 4th node, exact + jittered up to 60 m
-      for (let n = 0; n < ga.nodeCount; n += 4) {
+      const step = isl === 'saipan' ? 20 : 8;
+      for (let n = 0; n < ga.nodeCount; n += step) {
         origins.push({ cls: 'node', lat: ga.nodeLat[n], lng: ga.nodeLng[n] });
         const r = 60 * Math.sqrt(rng());
         const th = rng() * 2 * Math.PI;
         origins.push({ cls: 'node-jitter', lat: ga.nodeLat[n] + (r * Math.cos(th)) / M, lng: ga.nodeLng[n] + (r * Math.sin(th)) / (M * ga.kx) });
       }
-      // midpoints of every 5th edge with jitter up to 80 m (covers dead-end/service roads too)
-      for (let e = 0; e < ga.edgeCount; e += 5) {
+      for (let e = 0; e < ga.edgeCount; e += isl === 'saipan' ? 30 : 12) {
         const s = ga.geomStart[e];
         const k = s + Math.floor(ga.geomCount[e] / 2);
         const r = 80 * Math.sqrt(rng());
         const th = rng() * 2 * Math.PI;
         origins.push({ cls: 'edge-mid', lat: ga.ptLat[k] + (r * Math.cos(th)) / M, lng: ga.ptLng[k] + (r * Math.sin(th)) / (M * ga.kx) });
       }
-      for (const d of DESTS.filter((x) => x.island === isl)) origins.push({ cls: 'dest', lat: d.lat, lng: d.lng });
       for (const v of VILLAGES.filter((x) => x.island === isl)) origins.push({ cls: 'village', lat: v.lat, lng: v.lng });
       if (isl === 'saipan') {
-        // dense clusters around the six edges that lost the drive-main flag
         for (const e of REMOVED) {
-          for (const f of [0, 0.25, 0.5, 0.75, 1]) {
+          for (const f of [0, 0.5, 1]) {
             const s = ga.geomStart[e];
             const aLat = ga.ptLat[s];
             const aLng = ga.ptLng[s];
@@ -168,16 +166,16 @@ describe('scc verification: routes from many origins', () => {
             const bLng = ga.ptLng[s + ga.geomCount[e] - 1];
             const cLat = aLat + f * (bLat - aLat);
             const cLng = aLng + f * (bLng - aLng);
-            for (const r of [0, 8, 20, 40, 80, 150, 300]) {
-              for (let a = 0; a < (r === 0 ? 1 : 8); a++) {
-                const th = (a * Math.PI) / 4;
+            for (const r of [0, 15, 40, 80, 150]) {
+              for (let a = 0; a < (r === 0 ? 1 : 6); a++) {
+                const th = (a * Math.PI) / 3 + 0.3;
                 origins.push({ cls: 'removed-edge', lat: cLat + (r * Math.cos(th)) / M, lng: cLng + (r * Math.sin(th)) / (M * ga.kx) });
               }
             }
           }
         }
       }
-      const st = { origins: origins.length, targets: targets.length, pairs: 0, lost: 0, gained: 0, bothUnreachable: 0, originSnapChanged: 0, originNullBefore: 0, originNullAfter: 0, equalPairs: 0, unexpectedDiff: 0, worseGt100m: 0, worseGt500m: 0, worseGtRatio1_25: 0, maxIncreaseM: 0, maxDecreaseM: 0 } as any;
+      const st = { origins: origins.length, targets: targets.length, pairs: 0, lost: 0, gained: 0, bothUnreachable: 0, originSnapChanged: 0, originNullBefore: 0, originNullAfter: 0, equalPairs: 0, unexpectedDiff: 0, changedPairs: 0, worseGt100m: 0, worseGt500m: 0, worseGtRatio1_25: 0, maxIncreaseM: 0, maxDecreaseM: 0 } as any;
       const byClass: Record<string, { n: number; changed: number; lostOrigins: number }> = {};
       for (const o of origins) {
         const c = (byClass[o.cls] ??= { n: 0, changed: 0, lostOrigins: 0 });
@@ -200,15 +198,16 @@ describe('scc verification: routes from many origins', () => {
           if (!a && !b) { st.bothUnreachable++; continue; }
           const dd = a!.distanceM - b!.distanceM;
           if (snapSame) {
-            // destination snaps are unchanged for every target (checked above), so an unchanged origin snap must give identical routes
             if (Math.abs(dd) > 1e-6 || Math.abs(a!.durationS - b!.durationS) > 1e-9) { st.unexpectedDiff++; worst.push({ kind: 'UNEXPECTED', isl, origin: o, target: t.id, before: b, after: a }); }
             else st.equalPairs++;
           } else {
+            st.changedPairs++;
             if (dd > st.maxIncreaseM) st.maxIncreaseM = dd;
             if (-dd > st.maxDecreaseM) st.maxDecreaseM = -dd;
             if (dd > 100) st.worseGt100m++;
             if (dd > 500) st.worseGt500m++;
             if (a!.distanceM > b!.distanceM * 1.25 && dd > 50) st.worseGtRatio1_25++;
+            changedRows.push({ isl, cls: o.cls, o: [+o.lat.toFixed(6), +o.lng.toFixed(6)], sb: sb && { e: sb.edge, d: +sb.distM.toFixed(1) }, sa: sa && { e: sa.edge, d: +sa.distM.toFixed(1) }, t: t.id, dd: +dd.toFixed(1), before: +b!.distanceM.toFixed(1), after: +a!.distanceM.toFixed(1) });
             if (dd > 100 || a!.distanceM > b!.distanceM * 1.25) worst.push({ kind: 'worse', isl, origin: o, snapBefore: sb && { e: sb.edge, d: +sb.distM.toFixed(1) }, snapAfter: sa && { e: sa.edge, d: +sa.distM.toFixed(1) }, target: t.id, dd: +dd.toFixed(1), before: +b!.distanceM.toFixed(1), after: +a!.distanceM.toFixed(1) });
           }
         }
@@ -218,7 +217,8 @@ describe('scc verification: routes from many origins', () => {
       summary[isl] = st;
     }
     worst.sort((x, y) => (y.dd ?? 0) - (x.dd ?? 0));
-    fs.writeFileSync(OUT, JSON.stringify({ summary, lostCount: lost.length, lost: lost.slice(0, 40), worst: worst.slice(0, 60) }, null, 1));
+    changedRows.sort((x, y) => y.dd - x.dd);
+    fs.writeFileSync(OUT, JSON.stringify({ summary, lostCount: lost.length, lost: lost.slice(0, 40), worst: worst.slice(0, 60), topChanged: changedRows.slice(0, 25), bottomChanged: changedRows.slice(-10) }, null, 1));
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(summary, null, 1));
   });

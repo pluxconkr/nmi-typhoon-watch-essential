@@ -1,19 +1,25 @@
 /**
- * S-02 Alert detail · official text + provenance. The summary never replaces the official text.
+ * S-02 Alert detail: what you need to know (big, plain, from the alert's own fields), then the one-sentence
+ * summary, then the official text and where it came from. Neither summary replaces the official text.
  */
 import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { alertEssentials } from '@/domain/essentials';
+import { isActive, isTyphoonClass } from '@/domain/nws';
 import { formatChstStamp } from '@/domain/time';
 import { useAppState } from '@/store/appStore';
-import { PlainSummary } from '@/ui/alert-widgets';
+import { usePhase } from '@/store/derived';
+import { AlertEssentials, PlainSummary } from '@/ui/alert-widgets';
 import { Callout, Group, KeyValue, SectionFooter, SectionHeader, Subhead } from '@/ui/primitives';
 import { Screen } from '@/ui/Screen';
 import { colors, tabular, type } from '@/ui/theme';
 
 export default function AlertDetailScreen() {
   const { id } = useLocalSearchParams<'/alert/[id]'>();
-  const alert = useAppState((s) => s.alerts.find((a) => a.alertId === id) ?? null);
+  const alerts = useAppState((s) => s.alerts);
+  const alert = alerts.find((a) => a.alertId === id) ?? null;
+  const phase = usePhase();
 
   if (!alert) {
     return (
@@ -25,12 +31,22 @@ export default function AlertDetailScreen() {
     );
   }
 
+  // An ended watch may have become a warning: point to whatever is in effect now instead.
+  const newerActive = alerts.some((a) => a.alertId !== alert.alertId && isActive(a, phase.now) && (isTyphoonClass(a.event) || /extreme wind/i.test(a.event) || a.event === alert.event));
+  const essentials = alertEssentials(alert, phase.now, phase, newerActive);
+
   return (
     <Screen
       title="Official alert"
       largeTitle={alert.event}
       subtitle={`${alert.severity} · ${alert.senderName} · ${formatChstStamp(alert.sent)}`}
       note={alert.isDemo ? 'Demo data · real NWS text, times shifted to now' : undefined}>
+      <SectionHeader>What you need to know</SectionHeader>
+      <Group padded>
+        <AlertEssentials e={essentials} />
+      </Group>
+      <SectionFooter>{essentials.steps.length ? 'Times and places are from the official alert. The steps are standard safety advice for this kind of alert.' : 'Times and places are from the official alert.'}</SectionFooter>
+
       <SectionHeader>In plain words</SectionHeader>
       <Group padded>
         <PlainSummary summary={alert.plainSummary ?? alert.headline} status={alert.plainSummary ? 'ok' : alert.summaryStatus} generatedAt={alert.summaryAt} isDemo={alert.isDemo} />

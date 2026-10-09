@@ -211,7 +211,7 @@ function legsFor(g: RoadGraph, tree: SearchTree, end: RoadPoint, arrival: Arriva
     u = prev;
   }
   // u is a seed node reached along the start edge. On a loop (from = to), go back only if the edge allows it.
-  const toFrom = u === g.edgeFrom[s.edge];
+  const toFrom = u === g.edgeFrom[s.edge] && (u !== g.edgeTo[s.edge] || (edgeReversible(g, s.edge, tree.mode) && s.offset < g.edgeLen[s.edge] / 2));
   legs.push({ edge: s.edge, from: s.offset, to: toFrom ? 0 : g.edgeLen[s.edge], startNode: null });
   return legs.reverse();
 }
@@ -312,7 +312,7 @@ function buildRoute(g: RoadGraph, tree: SearchTree, end: RoadPoint, arrival: Arr
     {
       maneuver: 'depart',
       side: null,
-      road: edgeNameOf(g, (legs.find((l) => l.from !== l.to) ?? legs[0]).edge),
+      road: edgeNameOf(g, (legs.find((l) => Math.abs(l.to - l.from) > 1e-6) ?? legs[0]).edge),
       stayOn: false,
       startDist: 0,
       endDist: total,
@@ -324,7 +324,7 @@ function buildRoute(g: RoadGraph, tree: SearchTree, end: RoadPoint, arrival: Arr
   for (let i = 1; i < legs.length; i++) {
     const node = legs[i].startNode;
     const d = legStart[i];
-    if (node === null || d <= 0 || d >= total) continue;
+    if (node === null || d <= 1e-6 || d >= total) continue;
     const road = edgeNameOf(g, legs[i].edge);
     const current = steps[steps.length - 1].road;
     const angle = turnAngle(bearingBetween(Math.max(0, d - PROBE_M), d), bearingBetween(d, Math.min(total, d + PROBE_M)));
@@ -547,4 +547,4 @@ export function formatTravelTime(s: number): string {
   return rest ? `${h} h ${rest} min` : `${h} h`;
 }
 
-test('module marker', () => {});
+test('noop', () => {});
